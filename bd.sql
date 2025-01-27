@@ -33,9 +33,6 @@ CREATE TABLE Likes (
     id_pelicula INT,
     FOREIGN KEY (id_usuario) REFERENCES Usuarios(id_usuario),
     FOREIGN KEY (id_pelicula) REFERENCES Peliculas(id_pelicula)
-<<<<<<< HEAD
-)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-=======
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Insertando 30 películas en la tabla Peliculas
@@ -70,4 +67,3 @@ INSERT INTO Peliculas (titulo, director, fecha_estreno, descripcion, categoria, 
 ('La La Land', 'Damien Chazelle', '2016-12-09', 'Un pianista y una actriz luchan por sus sueños en Los Ángeles.', 'musical', 'https://via.placeholder.com/300x450?text=La+La+Land', 180),
 ('The Greatest Showman', 'Michael Gracey', '2017-12-20', 'La historia de P.T. Barnum y su espectáculo circense.', 'musical', 'https://via.placeholder.com/300x450?text=Showman', 170),
 ('A Star Is Born', 'Bradley Cooper', '2018-10-05', 'Una joven cantante y un músico luchan por el éxito.', 'musical', 'https://via.placeholder.com/300x450?text=Star+Is+Born', 160);
->>>>>>> Daniel

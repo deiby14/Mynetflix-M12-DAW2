@@ -1,0 +1,46 @@
+body {
+    background-color: #141414;
+    color: white;
+}
+.navbar {
+    background-color: #000;
+}
+.navbar-brand {
+    color: #e50914;
+    font-weight: bold;
+}
+.movie-card img {
+    border-radius: 10px;
+    width: 250px; /* Ancho fijo */
+    height: 350px; /* Alto fijo */
+    object-fit: cover; /* Mantiene el contenido proporcional dentro del tamaño fijo */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.movie-card img:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 20px rgba(255, 0, 0, 0.8);
+}
+.movie-title {
+    margin-top: 10px;
+    font-weight: bold;
+}
+.like-btn {
+    background-color: #e50914;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: inline-block;
+    margin-top: 10px;
+}
+.like-btn:hover {
+    background-color: #f40612;
+}
+.like-count {
+    font-size: 0.9rem;
+    margin-top: 5px;
+    color: #aaa;
+}

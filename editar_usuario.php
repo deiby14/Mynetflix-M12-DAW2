@@ -11,7 +11,7 @@ if (isset($_POST['id']) && isset($_POST['nombre']) && isset($_POST['email']) && 
 
     try {
         // Actualizar el usuario existente sin cambiar la contrasena
-        $stmt = $pdo->prepare("UPDATE Usuarios SET nombre = :nombre, email = :email, estado = :estado, es_admin = :es_admin WHERE id_usuario = :id");
+        $stmt = $conn->prepare("UPDATE Usuarios SET nombre = :nombre, email = :email, estado = :estado, es_admin = :es_admin WHERE id_usuario = :id");
         $stmt->bindParam(':nombre', $nombre);
         $stmt->bindParam(':email', $email);
         $stmt->bindParam(':estado', $estado);

@@ -7,7 +7,7 @@ if (isset($_POST['id'])) {
 
     try {
         // Preparar la consulta para eliminar el usuario
-        $stmt = $pdo->prepare("DELETE FROM Usuarios WHERE id_usuario = :id");
+        $stmt = $conn->prepare("DELETE FROM Usuarios WHERE id_usuario = :id");
         $stmt->bindParam(':id', $id, PDO::PARAM_INT);
         $stmt->execute();
 

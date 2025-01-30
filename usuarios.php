@@ -35,7 +35,7 @@ try {
             <a href="peliculas.php" class="btn btn-info">Ir a Películas</a>
         </div>
         <h1 class="mb-4">Gestión de Usuarios</h1>
-        <button class="btn btn-primary mb-3" onclick="mostrarFormulario('añadir')">Añadir Usuario</button>
+        <button class="btn btn-primary mb-3">Añadir Usuario</button>
         <div id="formularioContainer">
             <?php include 'formulario_usuario.php'; ?>
         </div>

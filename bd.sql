@@ -11,7 +11,7 @@ CREATE TABLE Usuarios (
     id_usuario INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(190) NOT NULL,
     email VARCHAR(190) UNIQUE NOT NULL,
-    contraseña VARCHAR(255) NOT NULL,
+    contrasena VARCHAR(255) NOT NULL,
     es_admin ENUM ('admin', 'cliente') DEFAULT 'cliente',
     estado ENUM('activo', 'inactivo', 'pendiente') DEFAULT 'pendiente'
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

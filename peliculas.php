@@ -1,10 +1,8 @@
 <?php
-// Incluir el archivo de conexión
-include 'conexion.php';
+require_once 'includes/peliculas_functions.php';
 
 try {
-    $stmt = $conn->query("SELECT * FROM Peliculas ORDER BY likes DESC");
-    $peliculas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $peliculas = getAllPeliculas();
 } catch (PDOException $e) {
     echo "Error al obtener las películas: " . $e->getMessage();
     exit();

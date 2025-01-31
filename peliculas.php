@@ -3,7 +3,7 @@
 include 'conexion.php';
 
 try {
-    $stmt = $pdo->query("SELECT * FROM Peliculas ORDER BY likes DESC");
+    $stmt = $conn->query("SELECT * FROM Peliculas ORDER BY likes DESC");
     $peliculas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     echo "Error al obtener las películas: " . $e->getMessage();

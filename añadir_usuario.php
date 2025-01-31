@@ -13,7 +13,7 @@ if (isset($_POST['nombre'], $_POST['email'], $_POST['estado'], $_POST['es_admin'
     $contrasena = password_hash($_POST['contrasena'], PASSWORD_BCRYPT);
 
     try {
-        $stmt = $pdo->prepare("INSERT INTO Usuarios (nombre, email, estado, es_admin, contrasena) VALUES (:nombre, :email, :estado, :es_admin, :contrasena)");
+        $stmt = $conn->prepare("INSERT INTO Usuarios (nombre, email, estado, es_admin, contrasena) VALUES (:nombre, :email, :estado, :es_admin, :contrasena)");
         $stmt->bindParam(':nombre', $nombre);
         $stmt->bindParam(':email', $email);
         $stmt->bindParam(':estado', $estado);

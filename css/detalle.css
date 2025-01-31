@@ -1,0 +1,37 @@
+body {
+    background-color: #141414;
+    color: white;
+}
+.navbar {
+    background-color: #000;
+}
+.navbar-brand {
+    color: #e50914 !important;
+    font-weight: bold;
+}
+.movie-details {
+    background-color: #1f1f1f;
+    border-radius: 10px;
+    padding: 30px;
+    margin: 30px auto;
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.5);
+    max-width: 800px;
+}
+.movie-poster {
+    max-height: 400px;
+    width: 100%;
+    object-fit: cover;
+    border-radius: 10px;
+}
+.btn-netflix {
+    background-color: #e50914;
+    color: white;
+    border: none;
+    font-weight: bold;
+    padding: 10px 20px;
+    border-radius: 5px;
+    transition: background 0.3s;
+}
+.btn-netflix:hover {
+    background-color: #f40612;
+}

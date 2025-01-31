@@ -20,21 +20,33 @@ try {
         throw new Exception('Email o contraseña incorrectos');
     }
 
-    // Verificar estado de la cuenta
-    if ($usuario['estado'] === 'pendiente') {
-        throw new Exception('Tu cuenta está pendiente de activación');
-    }
-
-    if ($usuario['estado'] === 'inactivo') {
-        throw new Exception('Tu cuenta está inactiva');
-    }
-
     // Verificar contraseña
     if (!password_verify($password, $usuario['contrasena'])) {
         throw new Exception('Email o contraseña incorrectos');
     }
 
-    // Iniciar sesión
+    // Si es cliente, verificar estado
+    if ($usuario['es_admin'] === 'cliente') {
+        if ($usuario['estado'] === 'pendiente') {
+            echo json_encode([
+                'success' => false,
+                'error_type' => 'pending',
+                'message' => 'Tu cuenta está pendiente de activación'
+            ]);
+            exit;
+        }
+        
+        if ($usuario['estado'] === 'inactivo') {
+            echo json_encode([
+                'success' => false,
+                'error_type' => 'inactive',
+                'message' => 'Tu cuenta ha sido suspendida'
+            ]);
+            exit;
+        }
+    }
+
+    // Si llegamos aquí, el usuario puede iniciar sesión
     $_SESSION['usuario'] = [
         'id' => $usuario['id_usuario'],
         'nombre' => $usuario['nombre'],
@@ -54,6 +66,7 @@ try {
 } catch (Exception $e) {
     echo json_encode([
         'success' => false,
+        'error_type' => 'error',
         'message' => $e->getMessage()
     ]);
 }

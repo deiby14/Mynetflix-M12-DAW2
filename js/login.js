@@ -15,13 +15,23 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                // Redirigir según el tipo de usuario
                 window.location.href = data.redirect;
             } else {
-                // Mostrar modal de error
-                const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
-                document.querySelector('.error-message').textContent = data.message;
-                errorModal.show();
+                // Determinar qué modal mostrar según el tipo de error
+                let modalId;
+                switch(data.error_type) {
+                    case 'pending':
+                        modalId = 'pendingModal';
+                        break;
+                    case 'inactive':
+                        modalId = 'inactiveModal';
+                        break;
+                    default:
+                        modalId = 'errorModal';
+                        document.querySelector('.error-message').textContent = data.message;
+                }
+                const modal = new bootstrap.Modal(document.getElementById(modalId));
+                modal.show();
             }
         })
         .catch(error => {

@@ -27,7 +27,12 @@ try {
     $stmt = $conn->prepare("SELECT id_usuario FROM Usuarios WHERE email = ?");
     $stmt->execute([$email]);
     if ($stmt->rowCount() > 0) {
-        throw new Exception('Este correo electrónico ya está registrado');
+        echo json_encode([
+            'success' => false,
+            'error_type' => 'email_exists',
+            'message' => 'Este correo electrónico ya está registrado'
+        ]);
+        exit;
     }
 
     // Insertar nuevo usuario

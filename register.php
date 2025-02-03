@@ -68,18 +68,22 @@
                 <div class="mb-3">
                     <label for="nombre" class="form-label">Nombre Completo</label>
                     <input type="text" class="form-control" name="nombre" id="nombre" placeholder="Ingresa tu nombre">
+                    <div class="invalid-feedback"></div>
                 </div>
                 <div class="mb-3">
                     <label for="email" class="form-label">Correo Electrónico</label>
                     <input type="email" class="form-control" name="email" id="email" placeholder="Ingresa tu correo">
+                    <div class="invalid-feedback"></div>
                 </div>
                 <div class="mb-3">
                     <label for="password" class="form-label">Contraseña</label>
                     <input type="password" class="form-control" name="password" id="password" placeholder="Crea una contraseña">
+                    <div class="invalid-feedback"></div>
                 </div>
                 <div class="mb-3">
                     <label for="confirm_password" class="form-label">Confirmar Contraseña</label>
                     <input type="password" class="form-control" name="confirm_password" id="confirm_password" placeholder="Confirma tu contraseña">
+                    <div class="invalid-feedback"></div>
                 </div>
                 <button type="submit" class="btn-netflix">Registrarse</button>
                 <p class="text-center mt-3">¿Ya tienes cuenta? <a href="login.php" class="text-link">Inicia sesión aquí</a></p>
@@ -103,6 +107,26 @@
                 </div>
                 <div class="modal-footer border-0 justify-content-center">
                     <button type="button" class="btn btn-netflix" onclick="window.location.href='login.php'" style="min-width: 150px;">Ir al Login</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Agregar nuevo modal para correo duplicado -->
+    <div class="modal fade" id="emailExistsModal" tabindex="-1" aria-labelledby="emailExistsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark text-white">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title" id="emailExistsModalLabel">Correo ya registrado</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center py-4">
+                    <i class="fas fa-exclamation-circle text-warning mb-4" style="font-size: 64px;"></i>
+                    <h4 class="mb-3">Este correo ya está en uso</h4>
+                    <p>Por favor, utiliza otro correo electrónico o inicia sesión si ya tienes una cuenta.</p>
+                </div>
+                <div class="modal-footer border-0 justify-content-center">
+                    <button type="button" class="btn btn-netflix" onclick="window.location.href='login.php'">Ir al Login</button>
                 </div>
             </div>
         </div>

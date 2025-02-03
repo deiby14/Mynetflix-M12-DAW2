@@ -22,7 +22,7 @@ CREATE TABLE Peliculas (
     director VARCHAR(255) NOT NULL,
     fecha_estreno DATE NOT NULL,
     descripcion TEXT,
-    categoria ENUM('accion', 'aventura', 'comedia', 'drama', 'terror', 'suspenso', 'ciencia-ficcion', 'fantasia', 'musical', 'animacion', 'documental') NOT NULL,
+    categoria ENUM('accion', 'aventura', 'comedia', 'drama', 'terror', 'suspenso', 'cienciaficcion', 'fantasia', 'musical', 'animacion', 'documental') NOT NULL,
     poster_url VARCHAR(255) DEFAULT 'default.jpg',
     likes INT DEFAULT 0
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

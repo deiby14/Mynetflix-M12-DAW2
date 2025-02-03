@@ -2,8 +2,7 @@
 include 'conexion.php';
 
 try {
-    // Consulta para obtener todos los usuarios
-    $stmt = $conn->query("SELECT id_usuario, nombre, email, estado, es_admin FROM Usuarios ORDER BY estado DESC");
+    $stmt = $pdo->query("SELECT * FROM Usuarios ORDER BY estado DESC");
     $usuarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     echo "Error al obtener los usuarios: " . $e->getMessage();

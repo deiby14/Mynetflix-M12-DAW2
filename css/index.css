@@ -44,3 +44,47 @@ body {
     margin-top: 5px;
     color: #aaa;
 }
+.like-btn.liked {
+    background-color: #f40612;
+}
+
+/* Estilo para botón de like deshabilitado (usuario no autenticado) */
+.like-btn.disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    background-color: rgba(240, 240, 240, 0.2);  /* Un poco más transparente */
+    position: relative;
+}
+
+.like-btn.disabled::before,
+.like-btn.disabled::after {
+    content: '';
+    position: absolute;
+    width: 3px;  /* Hacemos la X más gruesa */
+    height: 16px;  /* Hacemos la X más grande */
+    background-color: #ff0000;  /* Rojo más brillante */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(45deg);
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);  /* Añadimos sombra para que resalte */
+}
+
+.like-btn.disabled::after {
+    transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+/* Tooltip para usuarios no autenticados */
+.like-btn.disabled:hover::before {
+    content: 'Inicia sesión para dar like';
+    position: absolute;
+    background: transparent;  /* Quitamos el fondo */
+    color: #ff4444;  /* Color rojo más suave para el texto */
+    padding: 5px 10px;
+    font-size: 12px;
+    bottom: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);  /* Sombra para que el texto se lea mejor */
+    z-index: 1000;
+}

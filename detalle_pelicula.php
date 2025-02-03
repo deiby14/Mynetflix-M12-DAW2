@@ -1,16 +1,8 @@
 <?php
-require 'conexion.php';
+require_once 'includes/peliculas_functions.php';
 
-
-    $id_pelicula = $_GET['id'];
-
-    // Consulta para obtener los detalles de la película
-    $query = "SELECT * FROM Peliculas WHERE id_pelicula = :id";
-    $stmt = $conn->prepare($query);
-    $stmt->bindParam(':id', $id_pelicula, PDO::PARAM_INT);
-    $stmt->execute();
-    $pelicula = $stmt->fetch(PDO::FETCH_ASSOC);
-
+$id_pelicula = $_GET['id'];
+$pelicula = getPeliculaById($id_pelicula);
 ?>
 <!DOCTYPE html>
 <html lang="es">

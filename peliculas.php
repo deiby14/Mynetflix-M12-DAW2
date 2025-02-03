@@ -38,7 +38,7 @@ try {
         <?php 
         if(isset($_GET['accion']) && $_GET['accion'] == 'mostrar_form'): 
         ?>
-            <form action="procesar_pelicula.php" method="POST" class="mb-4">
+            <form action="procesar_pelicula.php" method="POST" class="mb-4" enctype="multipart/form-data">
                 <h3>Añadir Película</h3>
                 <div class="form-group">
                     <label for="titulo">Título</label>
@@ -66,6 +66,12 @@ try {
                     </select>
                 </div>
                 
+                <div class="form-group">
+                    <label for="poster">Imagen de la película</label>
+                    <input type="file" class="form-control" id="poster" name="poster" accept="image/*" required>
+                    <small class="form-text text-muted">Formatos permitidos: JPG, JPEG, PNG. Tamaño máximo: 2MB</small>
+                </div>
+                
                 <button type="submit" name="accion" value="añadir" class="btn btn-primary">Guardar</button>
                 <a href="peliculas.php" class="btn btn-secondary">Cancelar</a>
             </form>
@@ -76,7 +82,7 @@ try {
             $stmt->execute([$id]);
             $pelicula = $stmt->fetch(PDO::FETCH_ASSOC);
         ?>
-            <form action="procesar_pelicula.php" method="POST" class="mb-4">
+            <form action="procesar_pelicula.php" method="POST" class="mb-4" enctype="multipart/form-data">
                 <h3>Editar Película</h3>
                 <input type="hidden" name="id" value="<?= htmlspecialchars($pelicula['id_pelicula']) ?>">
                 
@@ -106,6 +112,18 @@ try {
                         <option value="Drama" <?= $pelicula['categoria'] == 'Drama' ? 'selected' : '' ?>>Drama</option>
                         <option value="Terror" <?= $pelicula['categoria'] == 'Terror' ? 'selected' : '' ?>>Terror</option>
                     </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="poster">Imagen de la película</label>
+                    <?php if (!empty($pelicula['poster_url'])): ?>
+                        <div class="mb-2">
+                            <img src="./img/<?= htmlspecialchars($pelicula['poster_url']) ?>" 
+                                 alt="Poster actual" style="max-width: 200px;">
+                        </div>
+                    <?php endif; ?>
+                    <input type="file" class="form-control" id="poster" name="poster" accept="image/*">
+                    <small class="form-text text-muted">Deja vacío para mantener la imagen actual. Formatos permitidos: JPG, JPEG, PNG. Tamaño máximo: 2MB</small>
                 </div>
                 
                 <button type="submit" name="accion" value="editar" class="btn btn-primary">Guardar</button>

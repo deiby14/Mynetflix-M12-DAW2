@@ -1,5 +1,6 @@
 <?php
 require 'datos_pelicula.php';
+require_once 'includes/session_check.php';
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -26,8 +27,13 @@ require 'datos_pelicula.php';
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item"><a class="nav-link" href="#">Inicio</a></li>
                     <li class="nav-item"><a class="nav-link" href="#">Películas</a></li>
-                    <li class="nav-item"><a class="nav-link" href="login.php">Login</a></li>
-                    <li class="nav-item"><a class="nav-link" href="register.php">Register</a></li>
+                    <?php if (!$isLoggedIn): ?>
+                        <li class="nav-item"><a class="nav-link" href="login.php">Login</a></li>
+                        <li class="nav-item"><a class="nav-link" href="register.php">Register</a></li>
+                    <?php else: ?>
+                        <li class="nav-item"><span class="nav-link">Bienvenido, <?php echo htmlspecialchars($_SESSION['usuario']['nombre']); ?></span></li>
+                        <li class="nav-item"><a class="nav-link" href="cerrar_sesion.php">Cerrar Sesión</a></li>
+                    <?php endif; ?>
                 </ul>
             </div>
         </div>
@@ -44,7 +50,9 @@ require 'datos_pelicula.php';
                             <img src="./img/<?php echo htmlspecialchars($pelicula['poster_url']); ?>" class="img-fluid">
                         </a>
                         <h5 class="movie-title"><?php echo htmlspecialchars($pelicula['titulo']); ?></h5>
-                        <button class="like-btn" onclick="likePelicula(<?php echo htmlspecialchars($pelicula['id_pelicula']); ?>)">
+                        <button class="like-btn <?php echo $pelicula['user_liked'] ? 'liked' : ''; ?>"
+                                data-pelicula-id="<?php echo htmlspecialchars($pelicula['id_pelicula']); ?>"
+                                <?php echo !$isLoggedIn ? 'disabled' : ''; ?>>
                             <i class="fas fa-thumbs-up"></i> Like
                         </button>
                         <div class="like-count" id="likes-<?php echo htmlspecialchars($pelicula['id_pelicula']); ?>">
@@ -67,7 +75,9 @@ require 'datos_pelicula.php';
                             <img src="./img/<?php echo htmlspecialchars($pelicula['poster_url']); ?>" class="img-fluid">
                         </a>
                         <h5 class="movie-title"><?php echo htmlspecialchars($pelicula['titulo']); ?></h5>
-                        <button class="like-btn" onclick="likePelicula(<?php echo htmlspecialchars($pelicula['id_pelicula']); ?>)">
+                        <button class="like-btn <?php echo $pelicula['user_liked'] ? 'liked' : ''; ?>"
+                                data-pelicula-id="<?php echo htmlspecialchars($pelicula['id_pelicula']); ?>"
+                                <?php echo !$isLoggedIn ? 'disabled' : ''; ?>>
                             <i class="fas fa-thumbs-up"></i> Like
                         </button>
                         <div class="like-count" id="likes-<?php echo htmlspecialchars($pelicula['id_pelicula']); ?>">
@@ -79,9 +89,12 @@ require 'datos_pelicula.php';
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script src="js/likes.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <script>
+        const userIsAuthenticated = <?php echo isset($_SESSION['usuario']) ? 'true' : 'false'; ?>;
+    </script>
 </body>
 
 </html>

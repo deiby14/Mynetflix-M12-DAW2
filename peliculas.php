@@ -64,7 +64,6 @@ try {
                         <option value="Acción">Acción</option>
                         <option value="Comedia">Comedia</option>
                         <option value="Drama">Drama</option>
-                        <option value="Ciencia Ficción">Ciencia Ficción</option>
                         <option value="Terror">Terror</option>
                     </select>
                 </div>
@@ -107,7 +106,6 @@ try {
                         <option value="Acción" <?= $pelicula['categoria'] == 'Acción' ? 'selected' : '' ?>>Acción</option>
                         <option value="Comedia" <?= $pelicula['categoria'] == 'Comedia' ? 'selected' : '' ?>>Comedia</option>
                         <option value="Drama" <?= $pelicula['categoria'] == 'Drama' ? 'selected' : '' ?>>Drama</option>
-                        <option value="Ciencia Ficción" <?= $pelicula['categoria'] == 'Ciencia Ficción' ? 'selected' : '' ?>>Ciencia Ficción</option>
                         <option value="Terror" <?= $pelicula['categoria'] == 'Terror' ? 'selected' : '' ?>>Terror</option>
                     </select>
                 </div>

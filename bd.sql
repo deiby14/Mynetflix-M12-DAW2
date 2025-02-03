@@ -22,7 +22,8 @@ CREATE TABLE Peliculas (
     director VARCHAR(255) NOT NULL,
     fecha_estreno DATE NOT NULL,
     descripcion TEXT,
-    categoria ENUM('accion', 'aventura', 'comedia', 'drama', 'terror', 'suspenso', 'cienciaficcion', 'fantasia', 'musical', 'animacion', 'documental') NOT NULL,
+    
+    categoria ENUM('accion', 'aventura', 'comedia', 'drama', 'terror', 'suspenso', 'fantasia', 'musical', 'animacion', 'documental') NOT NULL,
     poster_url VARCHAR(255) DEFAULT 'default.jpg',
     likes INT DEFAULT 0
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -37,14 +38,14 @@ CREATE TABLE Likes (
 
 -- Insertando 30 películas en la tabla Peliculas
 INSERT INTO Peliculas (titulo, director, fecha_estreno, descripcion, categoria, poster_url, likes) VALUES
-('Inception', 'Christopher Nolan', '2010-07-16', 'Un ladrón que entra en los sueños de las personas.', 'ciencia-ficcion', 'avatar.jpg', 400),
+('Inception', 'Christopher Nolan', '2010-07-16', 'Un ladrón que entra en los sueños de las personas.', 'accion', 'avatar.jpg', 400),
 ('The Dark Knight', 'Christopher Nolan', '2008-07-18', 'Batman enfrenta a su peor enemigo, el Joker.', 'accion', 'capitan.jpg', 400),
-('Interstellar', 'Christopher Nolan', '2014-11-07', 'Exploradores viajan a través de un agujero de gusano en el espacio.', 'ciencia-ficcion', 'joker.jpg', 400),
-('Avatar', 'James Cameron', '2009-12-18', 'Un ex-marine en la luna de Pandora.', 'ciencia-ficcion', 'mufasa.jpg', 400),
+('Interstellar', 'Christopher Nolan', '2014-11-07', 'Exploradores viajan a través de un agujero de gusano en el espacio.', 'accion', 'joker.jpg', 400),
+('Avatar', 'James Cameron', '2009-12-18', 'Un ex-marine en la luna de Pandora.', 'accion', 'mufasa.jpg', 400),
 ('Titanic', 'James Cameron', '1997-12-19', 'Un romance en medio del desastre marítimo más famoso.', 'drama', 'uncharted.jpg', 450),
 ('The Godfather', 'Francis Ford Coppola', '1972-03-24', 'La historia de la familia criminal Corleone.', 'drama', 'https://via.placeholder.com/300x450?text=The+Godfather', 220),
 ('Pulp Fiction', 'Quentin Tarantino', '1994-10-14', 'Historias interconectadas de criminales de Los Ángeles.', 'suspenso', 'https://via.placeholder.com/300x450?text=Pulp+Fiction', 190),
-('The Matrix', 'Lana Wachowski', '1999-03-31', 'Un hacker descubre la realidad detrás de su mundo.', 'ciencia-ficcion', 'https://via.placeholder.com/300x450?text=The+Matrix', 270),
+('The Matrix', 'Lana Wachowski', '1999-03-31', 'Un hacker descubre la realidad detrás de su mundo.', 'accion', 'https://via.placeholder.com/300x450?text=The+Matrix', 270),
 ('Gladiator', 'Ridley Scott', '2000-05-05', 'Un general romano traicionado busca venganza.', 'accion', 'https://via.placeholder.com/300x450?text=Gladiator', 160),
 ('The Shawshank Redemption', 'Frank Darabont', '1994-09-23', 'Un hombre inocente en prisión encuentra la redención.', 'drama', 'https://via.placeholder.com/300x450?text=Shawshank', 280),
 ('Fight Club', 'David Fincher', '1999-10-15', 'Un club secreto de peleas cambia vidas.', 'suspenso', 'https://via.placeholder.com/300x450?text=Fight+Club', 230),
@@ -60,7 +61,7 @@ INSERT INTO Peliculas (titulo, director, fecha_estreno, descripcion, categoria, 
 ('Mad Max: Fury Road', 'George Miller', '2015-05-15', 'Un mundo post-apocalíptico lleno de caos.', 'accion', 'https://via.placeholder.com/300x450?text=Mad+Max', 280),
 ('The Revenant', 'Alejandro G. Iñárritu', '2015-12-25', 'Un explorador lucha por sobrevivir.', 'aventura', 'https://via.placeholder.com/300x450?text=The+Revenant', 150),
 ('Zootopia', 'Byron Howard', '2016-03-04', 'Una conejita policía resuelve un misterio en una ciudad animal.', 'animacion', 'https://via.placeholder.com/300x450?text=Zootopia', 230),
-('Gravity', 'Alfonso Cuarón', '2013-10-04', 'Dos astronautas luchan por sobrevivir en el espacio.', 'ciencia-ficcion', 'https://via.placeholder.com/300x450?text=Gravity', 200),
+('Gravity', 'Alfonso Cuarón', '2013-10-04', 'Dos astronautas luchan por sobrevivir en el espacio.', 'accion', 'https://via.placeholder.com/300x450?text=Gravity', 200),
 ('The Conjuring', 'James Wan', '2013-07-19', 'Investigadores paranormales enfrentan una presencia oscura.', 'terror', 'https://via.placeholder.com/300x450?text=Conjuring', 220),
 ('It', 'Andy Muschietti', '2017-09-08', 'Un grupo de niños enfrenta a un payaso aterrador.', 'terror', 'https://via.placeholder.com/300x450?text=It', 190),
 ('Get Out', 'Jordan Peele', '2017-02-24', 'Un hombre afroamericano descubre un oscuro secreto familiar.', 'terror', 'https://via.placeholder.com/300x450?text=Get+Out', 210),

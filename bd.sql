@@ -22,7 +22,7 @@ CREATE TABLE Peliculas (
     director VARCHAR(255) NOT NULL,
     fecha_estreno DATE NOT NULL,
     descripcion TEXT,
-    categoria ENUM('accion', 'aventura', 'comedia', 'drama', 'terror', 'suspenso', 'ciencia_ficcion', 'fantasia', 'musical', 'animacion', 'documental') NOT NULL,
+    categoria ENUM('accion', 'aventura', 'comedia', 'drama', 'terror', 'suspenso', 'cienciaficcion', 'fantasia', 'musical', 'animacion', 'documental') NOT NULL,
     poster_url VARCHAR(255) DEFAULT 'default.jpg',
     likes INT DEFAULT 0
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -37,14 +37,14 @@ CREATE TABLE Likes (
 
 -- Insertando 30 películas en la tabla Peliculas
 INSERT INTO Peliculas (titulo, director, fecha_estreno, descripcion, categoria, poster_url, likes) VALUES
-('Inception', 'Christopher Nolan', '2010-07-16', 'Un ladrón que entra en los sueños de las personas.', 'ciencia_ficcion', 'Inception.jpg', 400),
+('Inception', 'Christopher Nolan', '2010-07-16', 'Un ladrón que entra en los sueños de las personas.', 'cienciaficcion', 'Inception.jpg', 400),
 ('The Dark Knight', 'Christopher Nolan', '2008-07-18', 'Batman enfrenta a su peor enemigo, el Joker.', 'accion', 'TheDarkKnight.jpg', 400),
-('Interstellar', 'Christopher Nolan', '2014-11-07', 'Exploradores viajan a través de un agujero de gusano en el espacio.', 'ciencia_ficcion', 'Interstellar.jpg', 400),
-('Avatar', 'James Cameron', '2009-12-18', 'Un ex-marine en la luna de Pandora.', 'ciencia_ficcion', 'Avatar.jpg', 400),
+('Interstellar', 'Christopher Nolan', '2014-11-07', 'Exploradores viajan a través de un agujero de gusano en el espacio.', 'cienciaficcion', 'Interstellar.jpg', 400),
+('Avatar', 'James Cameron', '2009-12-18', 'Un ex-marine en la luna de Pandora.', 'cienciaficcion', 'Avatar.jpg', 400),
 ('Titanic', 'James Cameron', '1997-12-19', 'Un romance en medio del desastre marítimo más famoso.', 'drama', 'Titanic.jpg', 450),
 ('The Godfather', 'Francis Ford Coppola', '1972-03-24', 'La historia de la familia criminal Corleone.', 'drama', 'TheGodfather.jpg', 0),
 ('Pulp Fiction', 'Quentin Tarantino', '1994-10-14', 'Historias interconectadas de criminales de Los Ángeles.', 'suspenso', 'PulpFiction.jpg', 0),
-('The Matrix', 'Lana Wachowski', '1999-03-31', 'Un hacker descubre la realidad detrás de su mundo.', 'ciencia_ficcion', 'TheMatrix.jpg', 0),
+('The Matrix', 'Lana Wachowski', '1999-03-31', 'Un hacker descubre la realidad detrás de su mundo.', 'cienciaficcion', 'TheMatrix.jpg', 0),
 ('Gladiator', 'Ridley Scott', '2000-05-05', 'Un general romano traicionado busca venganza.', 'accion', 'Gladiator.jpg', 0),
 ('The Shawshank Redemption', 'Frank Darabont', '1994-09-23', 'Un hombre inocente en prisión encuentra la redención.', 'drama', 'TheShawshankRedemption.jpg', 0),
 ('Fight Club', 'David Fincher', '1999-10-15', 'Un club secreto de peleas cambia vidas.', 'suspenso', 'FightClub.jpg', 0),
@@ -60,7 +60,7 @@ INSERT INTO Peliculas (titulo, director, fecha_estreno, descripcion, categoria, 
 ('Mad Max: Fury Road', 'George Miller', '2015-05-15', 'Un mundo post-apocalíptico lleno de caos.', 'accion', 'MadMaxFuryRoad.jpg', 0),
 ('The Revenant', 'Alejandro G. Iñárritu', '2015-12-25', 'Un explorador lucha por sobrevivir.', 'aventura', 'TheRevenant.jpg', 0),
 ('Zootopia', 'Byron Howard', '2016-03-04', 'Una conejita policía resuelve un misterio en una ciudad animal.', 'animacion', 'Zootopia.jpg', 0),
-('Gravity', 'Alfonso Cuarón', '2013-10-04', 'Dos astronautas luchan por sobrevivir en el espacio.', 'ciencia_ficcion', 'Gravity.jpg', 0),
+('Gravity', 'Alfonso Cuarón', '2013-10-04', 'Dos astronautas luchan por sobrevivir en el espacio.', 'cienciaficcion', 'Gravity.jpg', 0),
 ('The Conjuring', 'James Wan', '2013-07-19', 'Investigadores paranormales enfrentan una presencia oscura.', 'terror', 'TheConjuring.jpg', 0),
 ('It', 'Andy Muschietti', '2017-09-08', 'Un grupo de niños enfrenta a un payaso aterrador.', 'terror', 'It.jpg', 0),
 ('Get Out', 'Jordan Peele', '2017-02-24', 'Un hombre afroamericano descubre un oscuro secreto familiar.', 'terror', 'GetOut.jpg', 0),

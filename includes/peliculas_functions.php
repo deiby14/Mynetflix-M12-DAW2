@@ -13,17 +13,18 @@ function getPeliculasWithUserLikes($userId) {
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
-function getTop5Peliculas($userId = null) {
+function getTop5Peliculas($userId) {
     global $conn;
     
     $query = "SELECT p.*, 
               CASE WHEN l.id_like IS NOT NULL THEN 1 ELSE 0 END as user_liked
               FROM Peliculas p
               LEFT JOIN Likes l ON p.id_pelicula = l.id_pelicula AND l.id_usuario = ?
-              ORDER BY p.likes DESC 
+              ORDER BY p.likes DESC, p.titulo ASC
               LIMIT 5";
+    
     $stmt = $conn->prepare($query);
-    $stmt->execute([$userId ?? 0]);
+    $stmt->execute([$userId]);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
@@ -49,16 +50,17 @@ function getPeliculaById($id) {
     return $stmt->fetch(PDO::FETCH_ASSOC);
 }
 
-function getPeliculasOrdenadas($userId = null) {
+function getPeliculasOrdenadas($userId) {
     global $conn;
     
     $query = "SELECT p.*, 
               CASE WHEN l.id_like IS NOT NULL THEN 1 ELSE 0 END as user_liked
               FROM Peliculas p
               LEFT JOIN Likes l ON p.id_pelicula = l.id_pelicula AND l.id_usuario = ?
-              ORDER BY p.titulo ASC";
+              ORDER BY p.likes DESC, p.titulo ASC";
+    
     $stmt = $conn->prepare($query);
-    $stmt->execute([$userId ?? 0]);
+    $stmt->execute([$userId]);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 

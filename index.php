@@ -39,10 +39,10 @@ require_once 'includes/session_check.php';
         </div>
     </nav>
 
-    <!-- Top 5 Películas -->
-    <div class="container mt-5">
-        <h2 class="mb-4"><i class="fas fa-fire"></i> Top 5 Películas</h2>
-        <div class="row justify-content-center">
+    <!-- Sección Top 5 -->
+    <div class="container mt-5 mb-5">
+        <h2 class="mb-4"><i class="fas fa-star"></i> Top 5 Películas</h2>
+        <div class="row d-flex justify-content-center" id="peliculasTop5">
             <?php foreach ($peliculas_top5 as $pelicula): ?>
                 <div class="col-6 col-md-4 col-lg-2 mb-4 d-flex justify-content-center">
                     <div class="movie-card text-center">
@@ -66,7 +66,7 @@ require_once 'includes/session_check.php';
 
     <!-- Filtros (solo para usuarios autenticados) -->
     <?php if (isset($_SESSION['usuario'])): ?>
-        <div class="container mt-5 mb-4">
+        <div class="container mt-4">
             <div class="filter-container bg-dark p-3 rounded">
                 <div class="row g-3">
                     <div class="col-md-3">

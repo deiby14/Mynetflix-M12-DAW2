@@ -30,7 +30,7 @@
     <div class="container">
         <div class="form-container">
             <h2 class="text-center mb-4">Login</h2>
-            <form id="loginForm" action="" method="POST">
+            <form id="loginForm" action="" method="POST" novalidate>
                 <div class="mb-3">
                     <label for="email" class="form-label">Correo Electrónico</label>
                     <input type="email" class="form-control" name="email" id="email" placeholder="Ingresa tu correo">

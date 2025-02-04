@@ -19,34 +19,46 @@ function actualizarInterfaz(data, peliculaId) {
             counter.textContent = `${data.likes} Likes`;
         });
 
-        // 2. Actualizar ambas secciones siempre que haya datos de actualización
-        if (data.actualizacion) {
-            // Actualizar Top 5
-            const top5Container = document.querySelector('#peliculasTop5');
-            if (top5Container && data.actualizacion.top5) {
-                console.log('Actualizando Top 5...'); // Debug
-                const top5HTML = data.actualizacion.top5
-                    .map(pelicula => generarHTMLPelicula(pelicula))
-                    .join('');
-                top5Container.innerHTML = top5HTML;
-            }
+        // 2. Obtener los filtros actuales
+        const filtrosActuales = {
+            titulo: document.querySelector('input[name="titulo"]').value,
+            categoria: document.querySelector('select[name="categoria"]').value,
+            director: document.querySelector('select[name="director"]').value,
+            likes_order: document.querySelector('select[name="likes_order"]').value,
+            user_likes: document.querySelector('select[name="user_likes"]').value
+        };
 
-            // Actualizar todas las películas
-            const todasContainer = document.querySelector('#todasPeliculas');
-            if (todasContainer && data.actualizacion.todas) {
-                console.log('Actualizando Todas las Películas...'); // Debug
-                const todasHTML = data.actualizacion.todas
-                    .map(pelicula => generarHTMLPelicula(pelicula))
-                    .join('');
-                todasContainer.innerHTML = todasHTML;
-            }
+        // 3. Hacer una nueva petición con los filtros actuales
+        const params = new URLSearchParams(filtrosActuales);
+        
+        fetch(`procesar_filtros.php?${params}`)
+            .then(response => response.json())
+            .then(filteredData => {
+                if (filteredData.success) {
+                    // Actualizar el contenedor de todas las películas
+                    const todasContainer = document.querySelector('#todasPeliculas');
+                    if (todasContainer) {
+                        todasContainer.innerHTML = filteredData.html;
+                    }
 
-            // Reinicializar los botones de like
-            setTimeout(() => {
-                initializeLikeButtons();
-                console.log('Botones de like reinicializados'); // Debug
-            }, 0);
-        }
+                    // Actualizar el Top 5 si existe
+                    const top5Container = document.querySelector('#peliculasTop5');
+                    if (top5Container && filteredData.actualizacion && filteredData.actualizacion.top5) {
+                        let top5HTML = '';
+                        filteredData.actualizacion.top5.forEach(pelicula => {
+                            top5HTML += generarHTMLPelicula(pelicula);
+                        });
+                        top5Container.innerHTML = top5HTML;
+                    }
+
+                    // Reinicializar los botones de like
+                    initializeLikeButtons();
+                }
+            })
+            .catch(error => {
+                console.error('Error al actualizar con filtros:', error);
+            });
+
     } catch (error) {
         console.error('Error en actualizarInterfaz:', error);
     } finally {
@@ -56,7 +68,7 @@ function actualizarInterfaz(data, peliculaId) {
 
 function generarHTMLPelicula(pelicula) {
     return `
-        <div class="col-2 mb-4">
+        <div class="col-2">
             <div class="movie-card text-center">
                 <a href="detalle_pelicula.php?id=${pelicula.id_pelicula}">
                     <img src="./img/${pelicula.poster_url}" 

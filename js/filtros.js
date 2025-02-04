@@ -39,15 +39,38 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    function aplicarFiltros() {
-        console.log('Aplicando filtros...');
+    // Actualizar los valores del select de likes
+    const userLikesSelect = document.querySelector('select[name="user_likes"]');
+    if (userLikesSelect) {
+        userLikesSelect.innerHTML = `
+            <option value="">Todos</option>
+            <option value="con_likes">Mis Likes</option>
+            <option value="sin_likes">Sin Likes</option>
+        `;
+    }
+
+    function aplicarFiltros(page = 1) {
+        const titulo = document.querySelector('input[name="titulo"]').value;
+        const categoria = document.querySelector('select[name="categoria"]').value;
+        const director = document.querySelector('select[name="director"]').value;
+        const likesOrder = document.querySelector('select[name="likes_order"]').value;
+        const userLikes = document.querySelector('select[name="user_likes"]').value;
+
+        console.log('Valores de filtros:', {
+            titulo,
+            categoria,
+            director,
+            likesOrder,
+            userLikes
+        });
 
         const params = new URLSearchParams({
-            titulo: filterInputs.titulo.value || '',
-            categoria: filterInputs.categoria.value || '',
-            director: filterInputs.director.value || '',
-            likes_order: filterInputs.likes.value || '',
-            user_likes: filterInputs.userLikes.value || ''
+            titulo: titulo,
+            categoria: categoria,
+            director: director,
+            likes_order: likesOrder,
+            user_likes: userLikes,
+            page: page
         });
 
         console.log('Parámetros:', params.toString()); // Debug

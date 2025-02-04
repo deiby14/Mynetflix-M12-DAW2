@@ -41,26 +41,28 @@ try {
     $stmt->execute([$id_usuario, $id_pelicula]);
     $like_exists = $stmt->fetch();
 
+    // Obtener el número actual de likes antes de cualquier modificación
+    $stmt = $conn->prepare("SELECT likes FROM Peliculas WHERE id_pelicula = ?");
+    $stmt->execute([$id_pelicula]);
+    $likes_actuales = $stmt->fetch(PDO::FETCH_ASSOC)['likes'];
+
     if ($like_exists) {
         // Eliminar like
         $stmt = $conn->prepare("DELETE FROM Likes WHERE id_usuario = ? AND id_pelicula = ?");
         $stmt->execute([$id_usuario, $id_pelicula]);
+        $nuevo_total = max(0, $likes_actuales - 1); // Asegurar que no baje de 0
         $accion = 'unlike';
     } else {
         // Añadir like
         $stmt = $conn->prepare("INSERT INTO Likes (id_usuario, id_pelicula) VALUES (?, ?)");
         $stmt->execute([$id_usuario, $id_pelicula]);
+        $nuevo_total = $likes_actuales + 1;
         $accion = 'like';
     }
 
-    // Contar likes y actualizar
-    $stmt = $conn->prepare("SELECT COUNT(*) as total FROM Likes WHERE id_pelicula = ?");
-    $stmt->execute([$id_pelicula]);
-    $total_likes = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
-
     // Actualizar el contador en la tabla Peliculas
     $stmt = $conn->prepare("UPDATE Peliculas SET likes = ? WHERE id_pelicula = ?");
-    $stmt->execute([$total_likes, $id_pelicula]);
+    $stmt->execute([$nuevo_total, $id_pelicula]);
 
     $conn->commit();
 
@@ -75,7 +77,7 @@ try {
     echo json_encode([
         'success' => true,
         'accion' => $accion,
-        'likes' => $total_likes,
+        'likes' => $nuevo_total,
         'actualizacion' => [
             'top5' => $peliculas_top5,
             'todas' => $todas_peliculas

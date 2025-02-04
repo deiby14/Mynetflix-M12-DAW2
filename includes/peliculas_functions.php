@@ -18,12 +18,10 @@ function getTop5Peliculas($userId) {
     
     $query = "SELECT p.*, 
               CASE WHEN l_user.id_like IS NOT NULL THEN 1 ELSE 0 END as user_liked,
-              COUNT(l.id_like) as likes
+              p.likes as likes
               FROM Peliculas p
               LEFT JOIN Likes l_user ON p.id_pelicula = l_user.id_pelicula AND l_user.id_usuario = ?
-              LEFT JOIN Likes l ON p.id_pelicula = l.id_pelicula
-              GROUP BY p.id_pelicula
-              ORDER BY likes DESC, p.titulo ASC
+              ORDER BY p.likes DESC, p.titulo ASC
               LIMIT 5";
     
     try {
@@ -67,10 +65,10 @@ function getPeliculasOrdenadas($userId, $filtros = []) {
     // Añadir userId a los parámetros iniciales
     $params[] = $userId;
 
-    // Consulta base con conteo de likes
+    // Consulta base con conteo correcto de likes
     $baseQuery = "SELECT p.*, 
                   CASE WHEN l_user.id_like IS NOT NULL THEN 1 ELSE 0 END as user_liked,
-                  (SELECT COUNT(*) FROM Likes l WHERE l.id_pelicula = p.id_pelicula) as likes";
+                  p.likes as likes";  // Usar el campo likes de la tabla Peliculas
 
     // Filtro de likes del usuario
     if (!empty($filtros['user_likes'])) {
@@ -78,14 +76,14 @@ function getPeliculasOrdenadas($userId, $filtros = []) {
             // Películas que el usuario ha dado like
             $query = "SELECT p.*, 
                      1 as user_liked,
-                     (SELECT COUNT(*) FROM Likes l WHERE l.id_pelicula = p.id_pelicula) as likes
+                     p.likes as likes
                      FROM Peliculas p
                      INNER JOIN Likes l_user ON p.id_pelicula = l_user.id_pelicula AND l_user.id_usuario = ?";
         } else if ($filtros['user_likes'] === 'sin_likes') {
             // Películas que el usuario NO ha dado like
             $query = "SELECT p.*, 
                      0 as user_liked,
-                     (SELECT COUNT(*) FROM Likes l WHERE l.id_pelicula = p.id_pelicula) as likes
+                     p.likes as likes
                      FROM Peliculas p
                      WHERE p.id_pelicula NOT IN (
                          SELECT id_pelicula FROM Likes WHERE id_usuario = ?

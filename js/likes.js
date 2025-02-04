@@ -22,55 +22,70 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function likePelicula(peliculaId, button) {
-    const formData = new FormData();
-    formData.append('id_pelicula', peliculaId);
-
     fetch('procesar_like.php', {
         method: 'POST',
-        body: formData
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `id_pelicula=${peliculaId}`
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Error en la respuesta del servidor');
-        }
-        return response.json();
-    })
+    .then(response => response.json())
     .then(data => {
         if (data.success) {
-            // Actualizar el contador de likes
-            const likeCount = document.getElementById(`likes-${peliculaId}`);
-            if (likeCount) {
-                likeCount.textContent = `${data.likes} Likes`;
-            }
+            // Actualizar todos los botones y contadores para esta película
+            document.querySelectorAll(`.like-btn[data-pelicula-id="${peliculaId}"]`).forEach(btn => {
+                if (data.accion === 'like') {
+                    btn.classList.add('liked');
+                } else {
+                    btn.classList.remove('liked');
+                }
+            });
 
-            // Actualizar el estilo del botón
-            if (data.accion === 'like') {
-                button.classList.add('liked');
-            } else {
-                button.classList.remove('liked');
-            }
+            // Actualizar todos los contadores de likes para esta película
+            document.querySelectorAll(`#likes-${peliculaId}`).forEach(counter => {
+                counter.textContent = `${data.likes} Likes`;
+            });
         } else {
             console.error('Error:', data.message);
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        // Opcional: Mostrar un mensaje al usuario
-        alert('Ha ocurrido un error al procesar tu like');
     });
 }
 
+// Función para inicializar los botones de like
 function initializeLikeButtons() {
-    const likeButtons = document.querySelectorAll('.like-button');
+    console.log('Inicializando botones de like...'); // Debug
+    const likeButtons = document.querySelectorAll('.like-btn');
     
     likeButtons.forEach(button => {
-        // Verificar si el usuario está autenticado
-        if (!userIsAuthenticated) {  // Asegúrate de tener esta variable definida
+        // Si el usuario no está autenticado, deshabilitar el botón
+        if (!userIsAuthenticated) {
             button.classList.add('disabled');
             button.disabled = true;
             return;
         }
         
-        // ... resto del código existente para manejar clicks ...
+        // Eliminar eventos anteriores
+        button.removeEventListener('click', null);
+        
+        // Añadir nuevo evento click
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (!this.disabled) {
+                const peliculaId = this.getAttribute('data-pelicula-id');
+                likePelicula(peliculaId, this);
+            }
+        });
     });
-} 
+}
+
+// Inicializar los botones cuando se carga la página
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM Loaded - Inicializando likes...'); // Debug
+    initializeLikeButtons();
+});
+
+// Hacer la función disponible globalmente
+window.initializeLikeButtons = initializeLikeButtons; 

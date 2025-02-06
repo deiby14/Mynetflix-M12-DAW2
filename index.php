@@ -64,57 +64,73 @@ require_once 'includes/session_check.php';
         </div>
     </div>
 
-    <!-- Sección de filtros -->
-    <div class="container mt-4">
-        <div class="row mb-4">
-            <div class="col">
-                <input type="text" class="form-control" id="filterTitulo" name="titulo" placeholder="Buscar por título...">
+    <!-- Sección de filtros - solo visible para usuarios autenticados -->
+    <?php if (isset($_SESSION['usuario'])): ?>
+        <div class="container mt-4">
+            <!-- Filtros en un botón desplegable para móviles -->
+            <div class="row mb-3 d-lg-none">
+                <div class="col-12">
+                    <button class="btn btn-secondary w-100" type="button" data-bs-toggle="collapse" data-bs-target="#filtrosCollapse" aria-expanded="false" aria-controls="filtrosCollapse">
+                        <i class="fas fa-filter"></i> Mostrar Filtros
+                    </button>
+                </div>
             </div>
-            <div class="col">
-                <select class="form-select" id="filterCategoria" name="categoria">
-                    <option value="">Todas las categorías</option>
-                    <option value="accion">Acción</option>
-                    <option value="aventura">Aventura</option>
-                    <option value="comedia">Comedia</option>
-                    <option value="drama">Drama</option>
-                    <option value="terror">Terror</option>
-                    <option value="suspenso">Suspenso</option>
-                    <option value="ciencia_ficcion">Ciencia Ficción</option>
-                    <option value="fantasia">Fantasía</option>
-                    <option value="musical">Musical</option>
-                    <option value="animacion">Animación</option>
-                    <option value="documental">Documental</option>
-                </select>
-            </div>
-            <div class="col">
-                <select class="form-select" id="filterDirector" name="director">
-                    <option value="">Todos los directores</option>
-                    <?php foreach (getDirectores() as $director): ?>
-                        <option value="<?php echo htmlspecialchars($director); ?>">
-                            <?php echo htmlspecialchars($director); ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            <div class="col">
-                <select class="form-select" id="filterLikes" name="likes_order">
-                    <option value="">Ordenar por likes</option>
-                    <option value="desc">Más likes primero</option>
-                    <option value="asc">Menos likes primero</option>
-                </select>
-            </div>
-            <div class="col">
-                <select class="form-select" id="filterUserLikes" name="user_likes">
-                    <option value="">Todos</option>
-                    <option value="con_likes">Mis Likes</option>
-                    <option value="sin_likes">Sin Likes</option>
-                </select>
-            </div>
-            <div class="col">
-                <button class="btn btn-secondary" id="resetFilters">Reiniciar filtros</button>
+
+            <!-- Contenedor de filtros colapsable en móvil, siempre visible en desktop -->
+            <div class="collapse d-lg-block" id="filtrosCollapse">
+                <div class="row g-2">
+                    <div class="col-12 col-lg-2">
+                        <input type="text" class="form-control" id="filterTitulo" name="titulo" placeholder="Buscar por título...">
+                    </div>
+                    <div class="col-12 col-lg-2">
+                        <select class="form-select" id="filterCategoria" name="categoria">
+                            <option value="">Todas las categorías</option>
+                            <option value="accion">Acción</option>
+                            <option value="aventura">Aventura</option>
+                            <option value="comedia">Comedia</option>
+                            <option value="drama">Drama</option>
+                            <option value="terror">Terror</option>
+                            <option value="suspenso">Suspenso</option>
+                            <option value="ciencia_ficcion">Ciencia Ficción</option>
+                            <option value="fantasia">Fantasía</option>
+                            <option value="musical">Musical</option>
+                            <option value="animacion">Animación</option>
+                            <option value="documental">Documental</option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-lg-2">
+                        <select class="form-select" id="filterDirector" name="director">
+                            <option value="">Todos los directores</option>
+                            <?php foreach (getDirectores() as $director): ?>
+                                <option value="<?php echo htmlspecialchars($director); ?>">
+                                    <?php echo htmlspecialchars($director); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="col-12 col-lg-2">
+                        <select class="form-select" id="filterLikes" name="likes_order">
+                            <option value="">Ordenar por likes</option>
+                            <option value="desc">Más likes primero</option>
+                            <option value="asc">Menos likes primero</option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-lg-2">
+                        <select class="form-select" id="filterUserLikes" name="user_likes">
+                            <option value="">Todos</option>
+                            <option value="con_likes">Mis Likes</option>
+                            <option value="sin_likes">Sin Likes</option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-lg-2">
+                        <button class="btn btn-secondary w-100" id="resetFilters">
+                            <i class="fas fa-undo"></i> Reiniciar
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
+    <?php endif; ?>
 
     <!-- Contenedor para todas las películas -->
     <div class="container mt-5">

@@ -39,7 +39,7 @@ try {
     $html = '';
     foreach ($peliculas as $pelicula) {
         $html .= '
-        <div class="col-2">
+        <div class="col-6 col-md-4 col-lg-2">
             <div class="movie-card text-center">
                 <a href="detalle_pelicula.php?id=' . $pelicula['id_pelicula'] . '">
                     <img src="./img/' . htmlspecialchars($pelicula['poster_url']) . '" 

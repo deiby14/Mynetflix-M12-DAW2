@@ -13,7 +13,7 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
-            <a class="navbar-brand" href="#"><i class="fas fa-video"></i> Netflix</a>
+            <a class="navbar-brand" href="index.php"><i class="fas fa-video"></i> Netflix</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -30,14 +30,16 @@
     <div class="container">
         <div class="form-container">
             <h2 class="text-center mb-4">Login</h2>
-            <form id="loginForm" action="" method="POST">
+            <form id="loginForm" action="" method="POST" novalidate>
                 <div class="mb-3">
                     <label for="email" class="form-label">Correo Electrónico</label>
-                    <input type="email" class="form-control" name="email" id="email" placeholder="Ingresa tu correo" required>
+                    <input type="email" class="form-control" name="email" id="email" placeholder="Ingresa tu correo">
+                    <div class="invalid-feedback"></div>
                 </div>
                 <div class="mb-3">
                     <label for="password" class="form-label">Contraseña</label>
-                    <input type="password" class="form-control" name="password" id="password" placeholder="Ingresa tu contraseña" required>
+                    <input type="password" class="form-control" name="password" id="password" placeholder="Ingresa tu contraseña">
+                    <div class="invalid-feedback"></div>
                 </div>
                 <button type="submit" class="btn-netflix">Iniciar Sesión</button>
                 <p class="text-center mt-3">¿No tienes cuenta? <a href="register.php" class="text-link">Regístrate aquí</a></p>

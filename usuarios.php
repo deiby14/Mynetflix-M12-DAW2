@@ -1,12 +1,49 @@
 <?php
 include 'conexion.php';
 
+// Configurar el modo de error de PDO
+$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
 try {
+    // Desactivar autocommit
+    $conn->beginTransaction();
+    
+    // Sanitizar y validar el ID si existe
+    if (isset($_GET['id'])) {
+        $id = filter_var($_GET['id'], FILTER_VALIDATE_INT);
+        if ($id === false) {
+            throw new Exception("ID de usuario inválido");
+        }
+    }
+
+    // Consulta principal de usuarios
     $stmt = $conn->query("SELECT * FROM Usuarios ORDER BY estado DESC");
     $usuarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
-} catch (PDOException $e) {
-    echo "Error al obtener los usuarios: " . $e->getMessage();
-    exit();
+    
+    // Si estamos editando, obtener datos del usuario de forma segura
+    if (isset($_GET['accion']) && $_GET['accion'] == 'editar' && isset($id)) {
+        $stmt = $conn->prepare("SELECT * FROM Usuarios WHERE id_usuario = :id");
+        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
+        $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if (!$usuario) {
+            throw new Exception("Usuario no encontrado");
+        }
+    }
+
+    // Confirmar la transacción
+    $conn->commit();
+
+} catch (Exception $e) {
+    // Revertir la transacción en caso de error
+    if ($conn->inTransaction()) {
+        $conn->rollBack();
+    }
+    // Mostrar un mensaje de error amigable al usuario
+    $error_message = "Ha ocurrido un error: " . htmlspecialchars($e->getMessage());
+    // Registrar el error real para debugging
+    error_log("Error en usuarios.php: " . $e->getMessage());
 }
 ?>
 
@@ -34,6 +71,12 @@ try {
         </div>
         <h1 class="mb-4">Gestión de Usuarios</h1>
         <a href="?accion=mostrar_form" class="btn btn-primary mb-3">Añadir Usuario</a>
+        
+        <?php if (isset($error_message)): ?>
+            <div class="alert alert-danger" role="alert">
+                <?= $error_message ?>
+            </div>
+        <?php endif; ?>
         
         <?php 
         if(isset($_GET['accion']) && $_GET['accion'] == 'mostrar_form'): 
@@ -75,11 +118,7 @@ try {
                 <a href="usuarios.php" class="btn btn-secondary">Cancelar</a>
             </form>
         <?php 
-        elseif(isset($_GET['accion']) && $_GET['accion'] == 'editar' && isset($_GET['id'])): 
-            $id = $_GET['id'];
-            $stmt = $conn->prepare("SELECT * FROM Usuarios WHERE id_usuario = ?");
-            $stmt->execute([$id]);
-            $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+        elseif(isset($_GET['accion']) && $_GET['accion'] == 'editar' && isset($id) && isset($usuario)): 
         ?>
             <form action="procesar_usuario.php" method="POST" class="mb-4">
                 <h3>Editar Usuario</h3>
@@ -88,13 +127,15 @@ try {
                 <div class="form-group">
                     <label for="nombre">Nombre</label>
                     <input type="text" class="form-control" id="nombre" name="nombre" 
-                           value="<?= htmlspecialchars($usuario['nombre']) ?>" required>
+                           value="<?= htmlspecialchars($usuario['nombre']) ?>" 
+                           required>
                 </div>
                 
                 <div class="form-group">
                     <label for="email">Email</label>
                     <input type="email" class="form-control" id="email" name="email" 
-                           value="<?= htmlspecialchars($usuario['email']) ?>" required>
+                           value="<?= htmlspecialchars($usuario['email']) ?>" 
+                           required>
                 </div>
                 
                 <div class="form-group">

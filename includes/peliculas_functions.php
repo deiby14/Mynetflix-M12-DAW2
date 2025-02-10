@@ -5,9 +5,13 @@ function getPeliculasWithUserLikes($userId) {
     global $conn;
     
     $query = "SELECT p.*, 
+              GROUP_CONCAT(g.nombre) as generos,
               CASE WHEN l.id_like IS NOT NULL THEN 1 ELSE 0 END as user_liked
               FROM Peliculas p
-              LEFT JOIN Likes l ON p.id_pelicula = l.id_pelicula AND l.id_usuario = ?";
+              LEFT JOIN Likes l ON p.id_pelicula = l.id_pelicula AND l.id_usuario = ?
+              LEFT JOIN Peliculas_Generos pg ON p.id_pelicula = pg.id_pelicula
+              LEFT JOIN Generos g ON pg.id_genero = g.id_genero
+              GROUP BY p.id_pelicula";
     $stmt = $conn->prepare($query);
     $stmt->execute([$userId ?? 0]);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -17,10 +21,14 @@ function getTop5Peliculas($userId) {
     global $conn;
     
     $query = "SELECT p.*, 
+              GROUP_CONCAT(g.nombre) as generos,
               CASE WHEN l_user.id_like IS NOT NULL THEN 1 ELSE 0 END as user_liked,
               p.likes as likes
               FROM Peliculas p
               LEFT JOIN Likes l_user ON p.id_pelicula = l_user.id_pelicula AND l_user.id_usuario = ?
+              LEFT JOIN Peliculas_Generos pg ON p.id_pelicula = pg.id_pelicula
+              LEFT JOIN Generos g ON pg.id_genero = g.id_genero
+              GROUP BY p.id_pelicula
               ORDER BY p.likes DESC, p.titulo ASC
               LIMIT 5";
     
@@ -37,8 +45,13 @@ function getTop5Peliculas($userId) {
 function getAllPeliculas() {
     global $conn;
     
-    $query = "SELECT p.*, 0 as user_liked 
+    $query = "SELECT p.*, 
+              GROUP_CONCAT(g.nombre) as generos,
+              0 as user_liked 
               FROM Peliculas p 
+              LEFT JOIN Peliculas_Generos pg ON p.id_pelicula = pg.id_pelicula
+              LEFT JOIN Generos g ON pg.id_genero = g.id_genero
+              GROUP BY p.id_pelicula
               ORDER BY p.titulo ASC";
     
     $stmt = $conn->prepare($query);
@@ -49,7 +62,12 @@ function getAllPeliculas() {
 function getPeliculaById($id) {
     global $conn;
     
-    $query = "SELECT * FROM Peliculas WHERE id_pelicula = :id";
+    $query = "SELECT p.*, GROUP_CONCAT(g.nombre) as generos 
+              FROM Peliculas p
+              LEFT JOIN Peliculas_Generos pg ON p.id_pelicula = pg.id_pelicula
+              LEFT JOIN Generos g ON pg.id_genero = g.id_genero
+              WHERE p.id_pelicula = :id
+              GROUP BY p.id_pelicula";
     $stmt = $conn->prepare($query);
     $stmt->bindParam(':id', $id, PDO::PARAM_INT);
     $stmt->execute();
@@ -59,83 +77,66 @@ function getPeliculaById($id) {
 function getPeliculasOrdenadas($userId, $filtros = []) {
     global $conn;
     
-    $where_clauses = [];
-    $params = [];
-    
-    // Añadir userId a los parámetros iniciales
-    $params[] = $userId;
+    // Query base para seleccionar películas con sus géneros y likes
+    $query = "SELECT DISTINCT p.*, 
+              GROUP_CONCAT(DISTINCT g.nombre) as generos,
+              CASE WHEN l_user.id_like IS NOT NULL THEN 1 ELSE 0 END as user_liked
+              FROM Peliculas p
+              LEFT JOIN Peliculas_Generos pg ON p.id_pelicula = pg.id_pelicula
+              LEFT JOIN Generos g ON pg.id_genero = g.id_genero
+              LEFT JOIN Likes l_user ON p.id_pelicula = l_user.id_pelicula AND l_user.id_usuario = ?";
 
-    // Consulta base con conteo correcto de likes
-    $baseQuery = "SELECT p.*, 
-                  CASE WHEN l_user.id_like IS NOT NULL THEN 1 ELSE 0 END as user_liked,
-                  p.likes as likes";  // Usar el campo likes de la tabla Peliculas
+    $params = [$userId];
+    $where = [];
 
-    // Filtro de likes del usuario
-    if (!empty($filtros['user_likes'])) {
-        if ($filtros['user_likes'] === 'con_likes') {
-            // Películas que el usuario ha dado like
-            $query = "SELECT p.*, 
-                     1 as user_liked,
-                     p.likes as likes
-                     FROM Peliculas p
-                     INNER JOIN Likes l_user ON p.id_pelicula = l_user.id_pelicula AND l_user.id_usuario = ?";
-        } else if ($filtros['user_likes'] === 'sin_likes') {
-            // Películas que el usuario NO ha dado like
-            $query = "SELECT p.*, 
-                     0 as user_liked,
-                     p.likes as likes
-                     FROM Peliculas p
-                     WHERE p.id_pelicula NOT IN (
-                         SELECT id_pelicula FROM Likes WHERE id_usuario = ?
-                     )";
-        } else {
-            // Todas las películas (valor por defecto)
-            $query = $baseQuery . " FROM Peliculas p
-                     LEFT JOIN Likes l_user ON p.id_pelicula = l_user.id_pelicula AND l_user.id_usuario = ?";
-        }
-    } else {
-        $query = $baseQuery . " FROM Peliculas p
-                 LEFT JOIN Likes l_user ON p.id_pelicula = l_user.id_pelicula AND l_user.id_usuario = ?";
-    }
-
-    // Filtro de título
+    // Aplicar filtros si existen
     if (!empty($filtros['titulo'])) {
-        $where_clauses[] = "p.titulo LIKE ?";
+        $where[] = "p.titulo LIKE ?";
         $params[] = "%" . $filtros['titulo'] . "%";
     }
-    
-    // Filtro de categoría
-    if (!empty($filtros['categoria']) && $filtros['categoria'] !== 'Todas') {
-        $where_clauses[] = "p.categoria = ?";
+
+    if (!empty($filtros['categoria'])) {
+        $where[] = "g.nombre = ?";
         $params[] = $filtros['categoria'];
     }
-    
-    // Filtro de director
-    if (!empty($filtros['director']) && $filtros['director'] !== 'Todos') {
-        $where_clauses[] = "p.director = ?";
+
+    if (!empty($filtros['director'])) {
+        $where[] = "p.director = ?";
         $params[] = $filtros['director'];
     }
 
-    // Añadir cláusulas WHERE si existen
-    if (!empty($where_clauses)) {
-        $query .= (strpos($query, 'WHERE') !== false ? ' AND ' : ' WHERE ') . implode(" AND ", $where_clauses);
+    if (!empty($filtros['user_likes'])) {
+        if ($filtros['user_likes'] === 'con_likes') {
+            $where[] = "l_user.id_like IS NOT NULL";
+        } else if ($filtros['user_likes'] === 'sin_likes') {
+            $where[] = "l_user.id_like IS NULL";
+        }
     }
 
-    // Ordenar según el filtro de likes
+    // Añadir cláusulas WHERE si hay filtros
+    if (!empty($where)) {
+        $query .= " WHERE " . implode(" AND ", $where);
+    }
+
+    // Agrupar por película para manejar múltiples géneros
+    $query .= " GROUP BY p.id_pelicula";
+
+    // Ordenar resultados
     if (!empty($filtros['likes_order'])) {
-        if ($filtros['likes_order'] === 'asc') {
-            $query .= " ORDER BY likes ASC, p.titulo ASC";
-        } else if ($filtros['likes_order'] === 'desc') {
-            $query .= " ORDER BY likes DESC, p.titulo ASC";
-        }
+        $query .= " ORDER BY p.likes " . ($filtros['likes_order'] === 'desc' ? 'DESC' : 'ASC');
     } else {
         $query .= " ORDER BY p.titulo ASC";
     }
 
+    error_log("Query final: " . $query); // Debug
+    error_log("Parámetros: " . print_r($params, true)); // Debug
+
     try {
         $stmt = $conn->prepare($query);
         $stmt->execute($params);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        error_log("Películas encontradas: " . count($result)); // Debug
+        return $result;
     } catch (PDOException $e) {
         error_log("Error en getPeliculasOrdenadas: " . $e->getMessage());
         return [];

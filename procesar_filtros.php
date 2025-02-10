@@ -10,12 +10,8 @@ ini_set('display_errors', 1);
 error_log("procesar_filtros.php fue llamado");
 
 try {
-    // Verificar autenticación
-    if (!isset($_SESSION['usuario'])) {
-        throw new Exception('Usuario no autenticado');
-    }
-
-    $userId = $_SESSION['usuario']['id'];
+    // Obtener el ID de usuario si está autenticado
+    $userId = isset($_SESSION['usuario']) ? $_SESSION['usuario']['id'] : null;
 
     // Log de los parámetros recibidos
     error_log("Parámetros GET recibidos: " . print_r($_GET, true));
@@ -38,26 +34,9 @@ try {
     // Generar HTML para cada película
     $html = '';
     foreach ($peliculas as $pelicula) {
-        $html .= '
-        <div class="col-6 col-md-4 col-lg-2">
-            <div class="movie-card text-center">
-                <a href="detalle_pelicula.php?id=' . $pelicula['id_pelicula'] . '">
-                    <img src="./img/' . htmlspecialchars($pelicula['poster_url']) . '" 
-                         alt="' . htmlspecialchars($pelicula['titulo']) . '"
-                         class="img-fluid">
-                </a>
-                <h5 class="movie-title">' . htmlspecialchars($pelicula['titulo']) . '</h5>
-                <button class="like-btn ' . ($pelicula['user_liked'] ? 'liked' : '') . '"
-                        data-pelicula-id="' . $pelicula['id_pelicula'] . '">
-                    <i class="fas fa-thumbs-up"></i> Like
-                </button>
-                <div class="like-count" id="likes-' . $pelicula['id_pelicula'] . '">
-                    ' . $pelicula['likes'] . ' Likes
-                </div>
-            </div>
-        </div>';
+        $html .= generatePeliculaHTML($pelicula);
     }
-
+    
     echo json_encode([
         'success' => true,
         'html' => $html,
@@ -89,9 +68,12 @@ function generatePeliculaHTML($pelicula) {
     <div class="col-6 col-md-4 col-lg-2 mb-4">
         <div class="movie-card text-center">
             <a href="detalle_pelicula.php?id=' . htmlspecialchars($pelicula['id_pelicula']) . '">
-                <img src="./img/' . htmlspecialchars($pelicula['poster_url']) . '" class="img-fluid">
+                <img src="./img/' . htmlspecialchars($pelicula['poster_url']) . '" 
+                     alt="' . htmlspecialchars($pelicula['titulo']) . '"
+                     class="img-fluid">
             </a>
             <h5 class="movie-title">' . htmlspecialchars($pelicula['titulo']) . '</h5>
+            <p class="movie-genres">' . htmlspecialchars(str_replace(',', ', ', $pelicula['generos'])) . '</p>
             <button class="like-btn ' . ($pelicula['user_liked'] ? 'liked' : '') . '"
                     data-pelicula-id="' . htmlspecialchars($pelicula['id_pelicula']) . '">
                 <i class="fas fa-thumbs-up"></i> Like

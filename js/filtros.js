@@ -1,10 +1,4 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Solo inicializar los filtros si el usuario está autenticado
-    if (!userIsAuthenticated) {
-        console.log('Usuario no autenticado - filtros desactivados');
-        return;
-    }
-
     console.log('Filtros.js cargado'); // Debug
 
     const filterInputs = {
@@ -30,10 +24,19 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
 
+    // Si el usuario no está autenticado, solo deshabilitar los filtros
+    if (!userIsAuthenticated) {
+        console.log('Usuario no autenticado - filtros desactivados');
+        Object.values(filterInputs).forEach(input => {
+            if (input) input.disabled = true;
+        });
+        if (resetButton) resetButton.disabled = true;
+        return;
+    }
+
     let timeoutId;
 
     function reinicializarLikes() {
-        // Usar la función de inicialización global
         if (typeof initializeLikeButtons === 'function') {
             initializeLikeButtons();
         }
@@ -49,42 +52,36 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
     }
 
-    function aplicarFiltros(page = 1) {
-        const titulo = document.querySelector('input[name="titulo"]').value;
-        const categoria = document.querySelector('select[name="categoria"]').value;
-        const director = document.querySelector('select[name="director"]').value;
-        const likesOrder = document.querySelector('select[name="likes_order"]').value;
-        const userLikes = document.querySelector('select[name="user_likes"]').value;
+    function aplicarFiltros() {
+        const filtros = {
+            titulo: filterInputs.titulo ? filterInputs.titulo.value : '',
+            categoria: filterInputs.categoria ? filterInputs.categoria.value : '',
+            director: filterInputs.director ? filterInputs.director.value : '',
+            likes_order: filterInputs.likes ? filterInputs.likes.value : '',
+            user_likes: filterInputs.userLikes ? filterInputs.userLikes.value : ''
+        };
 
-        console.log('Valores de filtros:', {
-            titulo,
-            categoria,
-            director,
-            likesOrder,
-            userLikes
-        });
+        console.log('Valores de filtros:', filtros);
 
         const params = new URLSearchParams({
-            titulo: titulo,
-            categoria: categoria,
-            director: director,
-            likes_order: likesOrder,
-            user_likes: userLikes,
-            page: page
+            ...filtros,
+            page: '1'
         });
 
-        console.log('Parámetros:', params.toString()); // Debug
-
-        fetch(`procesar_filtros.php?${params}`)
-            .then(response => {
-                console.log('Respuesta recibida'); // Debug
-                return response.json();
-            })
+        fetch(`procesar_filtros.php?${params.toString()}`)
+            .then(response => response.json())
             .then(data => {
-                console.log('Datos recibidos:', data); // Debug
+                console.log('Datos recibidos:', data);
                 if (data.success) {
-                    peliculasContainer.innerHTML = data.html;
-                    reinicializarLikes(); // Reinicializar los likes después de actualizar el contenido
+                    if (peliculasContainer) {
+                        peliculasContainer.innerHTML = data.html;
+                        reinicializarLikes();
+                    }
+                    
+                    // Actualizar la interfaz si hay actualizaciones disponibles
+                    if (typeof updateMovieInterface === 'function' && data.actualizacion) {
+                        updateMovieInterface(data.actualizacion);
+                    }
                 } else {
                     console.error('Error en la respuesta:', data.error);
                 }

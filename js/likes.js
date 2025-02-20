@@ -107,6 +107,7 @@ function generateMovieCard(pelicula) {
                          class="img-fluid">
                 </a>
                 <h5 class="movie-title">${pelicula.titulo}</h5>
+                <p class="movie-genres">${pelicula.generos.replace(',', ', ')}</p>
                 <button class="like-btn ${pelicula.user_liked ? 'liked' : ''}"
                         data-pelicula-id="${pelicula.id_pelicula}">
                     <i class="fas fa-thumbs-up"></i> Like

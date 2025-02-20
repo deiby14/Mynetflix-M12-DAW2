@@ -4,7 +4,7 @@ require_once 'includes/peliculas_functions.php';
 header('Content-Type: application/json');
 
 error_reporting(E_ALL);
-ini_set('display_errors', 1);
+ini_set('display_errors', 0);
 
 // Log para debug
 error_log("procesar_filtros.php fue llamado");
@@ -19,9 +19,9 @@ try {
     // Recoger los parámetros de filtrado
     $filtros = [
         'titulo' => $_GET['titulo'] ?? '',
-        'categoria' => $_GET['categoria'] ?? '',
         'director' => $_GET['director'] ?? '',
         'likes_order' => $_GET['likes_order'] ?? '',
+        'generos' => $_GET['generos'] ?? '',
         'user_likes' => $_GET['user_likes'] ?? ''
     ];
 

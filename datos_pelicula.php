@@ -2,6 +2,13 @@
 require_once 'includes/session_check.php';
 require_once 'includes/peliculas_functions.php';
 
+function getDirectores() {
+    global $conn;
+    $stmt = $conn->prepare("SELECT DISTINCT director FROM Peliculas ORDER BY director");
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_COLUMN);
+}
+
 try {
     $userId = isset($_SESSION['usuario']) ? $_SESSION['usuario']['id'] : null;
     

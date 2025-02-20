@@ -3,7 +3,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const filterInputs = {
         titulo: document.getElementById('filterTitulo'),
-        categoria: document.getElementById('filterCategoria'),
         director: document.getElementById('filterDirector'),
         likes: document.getElementById('filterLikes'),
         userLikes: document.getElementById('filterUserLikes')
@@ -52,35 +51,52 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
     }
 
+    // Añadir manejo de géneros
+    const generoCheckboxes = document.querySelectorAll('.filter-genero');
+    const dropdownButton = document.getElementById('dropdownGeneros');
+
+    function updateGeneroButtonText() {
+        const selectedGeneros = getSelectedGeneros();
+        if (selectedGeneros.length === 0) {
+            dropdownButton.textContent = 'Seleccionar Géneros';
+        } else if (selectedGeneros.length === 1) {
+            dropdownButton.textContent = selectedGeneros[0];
+        } else {
+            dropdownButton.textContent = `${selectedGeneros.length} géneros seleccionados`;
+        }
+    }
+
+    function getSelectedGeneros() {
+        const selectedGeneros = [];
+        generoCheckboxes.forEach(checkbox => {
+            if (checkbox.checked) {
+                selectedGeneros.push(checkbox.value);
+            }
+        });
+        return selectedGeneros;
+    }
+
     function aplicarFiltros() {
         const filtros = {
             titulo: filterInputs.titulo ? filterInputs.titulo.value : '',
-            categoria: filterInputs.categoria ? filterInputs.categoria.value : '',
             director: filterInputs.director ? filterInputs.director.value : '',
             likes_order: filterInputs.likes ? filterInputs.likes.value : '',
-            user_likes: filterInputs.userLikes ? filterInputs.userLikes.value : ''
+            user_likes: filterInputs.userLikes ? filterInputs.userLikes.value : '',
+            generos: getSelectedGeneros().join(',')
         };
 
-        console.log('Valores de filtros:', filtros);
+        console.log('Aplicando filtros:', filtros); // Debug
 
-        const params = new URLSearchParams({
-            ...filtros,
-            page: '1'
-        });
-
+        const params = new URLSearchParams(filtros);
+        
         fetch(`procesar_filtros.php?${params.toString()}`)
             .then(response => response.json())
             .then(data => {
-                console.log('Datos recibidos:', data);
+                console.log('Respuesta del servidor:', data); // Debug
                 if (data.success) {
                     if (peliculasContainer) {
                         peliculasContainer.innerHTML = data.html;
                         reinicializarLikes();
-                    }
-                    
-                    // Actualizar la interfaz si hay actualizaciones disponibles
-                    if (typeof updateMovieInterface === 'function' && data.actualizacion) {
-                        updateMovieInterface(data.actualizacion);
                     }
                 } else {
                     console.error('Error en la respuesta:', data.error);
@@ -90,6 +106,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('Error en fetch:', error);
             });
     }
+
+    // Prevenir que los clicks en los checkboxes cierren el dropdown
+    document.querySelectorAll('.dropdown-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+    });
+
+    // Event listeners para los checkboxes de géneros
+    generoCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', () => {
+            updateGeneroButtonText();
+            aplicarFiltros();
+        });
+    });
 
     // Event listeners
     Object.values(filterInputs).forEach(input => {
@@ -115,6 +146,11 @@ document.addEventListener('DOMContentLoaded', function() {
             Object.values(filterInputs).forEach(input => {
                 if (input) input.value = '';
             });
+            // Limpiar checkboxes de géneros
+            generoCheckboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            updateGeneroButtonText();
             aplicarFiltros();
         });
     }

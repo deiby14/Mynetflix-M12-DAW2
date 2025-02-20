@@ -25,6 +25,16 @@ require_once 'includes/session_check.php';
             color: red;
             font-size: 1.2em;
         }
+
+        .movie-card {
+            transition: transform 0.5s ease;
+        }
+        
+        .top5-container .movie-card,
+        #todasPeliculas .movie-card {
+            will-change: transform;
+            position: relative;
+        }
     </style>
 </head>
 
@@ -56,7 +66,7 @@ require_once 'includes/session_check.php';
     <!-- Top 5 Películas -->
     <div class="container mt-4">
         <h2><i class="fas fa-star"></i> Top 5 Películas</h2>
-        <div class="row justify-content-center">
+        <div class="row justify-content-center top5-container">
             <?php foreach ($peliculas_top5 as $pelicula): ?>
                 <div class="col-6 col-md-4 col-lg-2 mb-4">
                     <div class="movie-card text-center">
@@ -86,61 +96,66 @@ require_once 'includes/session_check.php';
         <h2><i class="fas fa-film"></i> Todas las Películas</h2>
         
         <!-- Filtros (siempre visibles, pero deshabilitados si no hay sesión) -->
-        <div class="row mb-4">
+        <div class="row mb-3">
             <div class="col-md-2 mb-2">
-                <input type="text" id="filterTitulo" class="form-control" 
-                       placeholder="Buscar por título..."
-                       <?php echo !isset($_SESSION['usuario']) ? 'disabled' : ''; ?>>
+                <input type="text" class="form-control" id="filterTitulo" placeholder="Buscar por título...">
             </div>
             <div class="col-md-2 mb-2">
-                <select id="filterCategoria" class="form-select"
-                        <?php echo !isset($_SESSION['usuario']) ? 'disabled' : ''; ?>>
-                    <option value="">Todas las categorías</option>
-                    <option value="accion">Acción</option>
-                    <option value="aventura">Aventura</option>
-                    <option value="comedia">Comedia</option>
-                    <option value="drama">Drama</option>
-                    <option value="terror">Terror</option>
-                    <option value="suspenso">Suspenso</option>
-                    <option value="ciencia_ficcion">Ciencia Ficción</option>
-                    <option value="fantasia">Fantasía</option>
-                    <option value="musical">Musical</option>
-                    <option value="animacion">Animación</option>
-                </select>
+                <div class="dropdown">
+                    <button class="btn btn-light dropdown-toggle w-100" type="button" id="dropdownGeneros" data-bs-toggle="dropdown" aria-expanded="false">
+                        Seleccionar Géneros
+                    </button>
+                    <div class="dropdown-menu generos-container w-100" aria-labelledby="dropdownGeneros">
+                        <?php 
+                        $generos = getGeneros();
+                        foreach ($generos as $genero): 
+                            $generoId = 'genero_' . preg_replace('/[^a-zA-Z0-9]/', '_', $genero);
+                        ?>
+                            <div class="dropdown-item">
+                                <div class="form-check">
+                                    <input class="form-check-input filter-genero" type="checkbox" 
+                                           value="<?php echo htmlspecialchars($genero); ?>" 
+                                           id="<?php echo $generoId; ?>">
+                                    <label class="form-check-label" for="<?php echo $generoId; ?>">
+                                        <?php echo htmlspecialchars(ucfirst($genero)); ?>
+                                    </label>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
             </div>
             <div class="col-md-2 mb-2">
-                <select id="filterDirector" class="form-select"
-                        <?php echo !isset($_SESSION['usuario']) ? 'disabled' : ''; ?>>
+                <select class="form-select" id="filterDirector">
                     <option value="">Todos los directores</option>
                     <?php 
                     $directores = getDirectores();
-                    foreach ($directores as $director): ?>
-                        <option value="<?php echo htmlspecialchars($director); ?>">
-                            <?php echo htmlspecialchars($director); ?>
+                    foreach ($directores as $director): 
+                        $directorNombre = strip_tags($director);
+                    ?>
+                        <option value="<?php echo htmlspecialchars($directorNombre); ?>">
+                            <?php echo htmlspecialchars($directorNombre); ?>
                         </option>
                     <?php endforeach; ?>
                 </select>
             </div>
             <div class="col-md-2 mb-2">
-                <select id="filterLikes" class="form-select"
-                        <?php echo !isset($_SESSION['usuario']) ? 'disabled' : ''; ?>>
+                <select class="form-select" id="filterLikes" name="likes_order">
                     <option value="">Ordenar por likes</option>
-                    <option value="desc">Más likes primero</option>
-                    <option value="asc">Menos likes primero</option>
+                    <option value="desc">Más likes</option>
+                    <option value="asc">Menos likes</option>
                 </select>
             </div>
             <div class="col-md-2 mb-2">
-                <select id="filterUserLikes" class="form-select"
-                        <?php echo !isset($_SESSION['usuario']) ? 'disabled' : ''; ?>>
+                <select class="form-select" id="filterUserLikes" name="user_likes">
                     <option value="">Todos</option>
-                    <option value="con_likes">Con mis likes</option>
-                    <option value="sin_likes">Sin mis likes</option>
+                    <option value="con_likes">Mis Likes</option>
+                    <option value="sin_likes">Sin Likes</option>
                 </select>
             </div>
             <div class="col-md-2 mb-2">
-                <button id="resetFilters" class="btn btn-secondary w-100"
-                        <?php echo !isset($_SESSION['usuario']) ? 'disabled' : ''; ?>>
-                    <i class="fas fa-sync-alt"></i> Reiniciar
+                <button id="resetFilters" class="btn btn-secondary w-100">
+                    <i class="fas fa-undo"></i> Reiniciar
                 </button>
             </div>
         </div>
@@ -171,14 +186,13 @@ require_once 'includes/session_check.php';
         </div>
     </div>
 
-    <script src="js/likes.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
     <script>
         const userIsAuthenticated = <?php echo isset($_SESSION['usuario']) ? 'true' : 'false'; ?>;
-        console.log('Estado de autenticación:', userIsAuthenticated); // Debug
     </script>
+    <script src="js/likes.js"></script>
     <script src="js/filtros.js"></script>
 </body>
-
+                
 </html>

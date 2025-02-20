@@ -1,72 +1,103 @@
 let isProcessing = false;
 
-function actualizarInterfaz(data, peliculaId) {
-    if (isProcessing) return;
-    isProcessing = true;
+function actualizarInterfaz(data) {
+    if (!data.success) return;
 
-    try {
-        console.log('Actualizando interfaz con datos:', data); // Debug
+    // Actualizar el contador de likes y el botón
+    const counters = document.querySelectorAll(`#likes-${data.pelicula_id}`);
+    counters.forEach(counter => {
+        counter.textContent = `${data.likes} Likes`;
+    });
 
-        // 1. Actualizar el botón específico y su contador
-        const buttons = document.querySelectorAll(`.like-btn[data-pelicula-id="${peliculaId}"]`);
-        const counters = document.querySelectorAll(`#likes-${peliculaId}`);
-        
-        buttons.forEach(btn => {
-            btn.classList.toggle('liked', data.accion === 'like');
-        });
-        
-        counters.forEach(counter => {
-            counter.textContent = `${data.likes} Likes`;
-        });
+    const buttons = document.querySelectorAll(`.like-btn[data-pelicula-id="${data.pelicula_id}"]`);
+    buttons.forEach(btn => {
+        btn.classList.toggle('liked', data.accion === 'like');
+    });
 
-        // 2. Obtener los filtros actuales
-        const filtrosActuales = {
-            titulo: document.querySelector('input[name="titulo"]').value,
-            categoria: document.querySelector('select[name="categoria"]').value,
-            director: document.querySelector('select[name="director"]').value,
-            likes_order: document.querySelector('select[name="likes_order"]').value,
-            user_likes: document.querySelector('select[name="user_likes"]').value
-        };
+    // Actualizar Top 5 con animación
+    if (data.top5) {
+        const top5Container = document.querySelector('.top5-container');
+        if (top5Container) {
+            const oldCards = Array.from(top5Container.children);
+            const oldPositions = oldCards.map(card => ({
+                id: card.querySelector('.like-btn').dataset.peliculaId,
+                rect: card.getBoundingClientRect()
+            }));
 
-        // 3. Hacer una nueva petición con los filtros actuales
-        const params = new URLSearchParams(filtrosActuales);
-        
-        fetch(`procesar_filtros.php?${params}`)
-            .then(response => response.json())
-            .then(filteredData => {
-                if (filteredData.success) {
-                    // Actualizar el contenedor de todas las películas
-                    const todasContainer = document.querySelector('#todasPeliculas');
-                    if (todasContainer) {
-                        todasContainer.innerHTML = filteredData.html;
-                    }
-
-                    // Actualizar el Top 5 si existe
-                    const top5Container = document.querySelector('#peliculasTop5');
-                    if (top5Container && filteredData.actualizacion && filteredData.actualizacion.top5) {
-                        let top5HTML = '';
-                        filteredData.actualizacion.top5.forEach(pelicula => {
-                            top5HTML += generarHTMLPelicula(pelicula);
-                        });
-                        top5Container.innerHTML = top5HTML;
-                    }
-
-                    // Reinicializar los botones de like
-                    initializeLikeButtons();
-                }
-            })
-            .catch(error => {
-                console.error('Error al actualizar con filtros:', error);
+            let htmlTop5 = '';
+            data.top5.forEach(pelicula => {
+                htmlTop5 += generateMovieCard(pelicula);
             });
+            
+            top5Container.innerHTML = htmlTop5;
 
-    } catch (error) {
-        console.error('Error en actualizarInterfaz:', error);
-    } finally {
-        isProcessing = false;
+            // Aplicar animaciones a las nuevas tarjetas
+            const newCards = Array.from(top5Container.children);
+            newCards.forEach(card => {
+                const btn = card.querySelector('.like-btn');
+                const id = btn.dataset.peliculaId;
+                const oldPosition = oldPositions.find(pos => pos.id === id);
+                
+                if (oldPosition) {
+                    const newRect = card.getBoundingClientRect();
+                    const deltaY = oldPosition.rect.top - newRect.top;
+                    
+                    if (Math.abs(deltaY) > 1) {
+                        card.style.transform = `translateY(${deltaY}px)`;
+                        requestAnimationFrame(() => {
+                            card.style.transition = 'transform 0.5s ease';
+                            card.style.transform = '';
+                        });
+                    }
+                }
+            });
+        }
     }
+
+    // Actualizar todas las películas si hay orden por likes
+    if (data.todas) {
+        const peliculasContainer = document.getElementById('todasPeliculas');
+        if (peliculasContainer) {
+            const oldCards = Array.from(peliculasContainer.children);
+            const oldPositions = oldCards.map(card => ({
+                id: card.querySelector('.like-btn').dataset.peliculaId,
+                rect: card.getBoundingClientRect()
+            }));
+
+            let htmlTodas = '';
+            data.todas.forEach(pelicula => {
+                htmlTodas += generateMovieCard(pelicula);
+            });
+            
+            peliculasContainer.innerHTML = htmlTodas;
+
+            // Aplicar animaciones a las nuevas tarjetas
+            const newCards = Array.from(peliculasContainer.children);
+            newCards.forEach(card => {
+                const btn = card.querySelector('.like-btn');
+                const id = btn.dataset.peliculaId;
+                const oldPosition = oldPositions.find(pos => pos.id === id);
+                
+                if (oldPosition) {
+                    const newRect = card.getBoundingClientRect();
+                    const deltaY = oldPosition.rect.top - newRect.top;
+                    
+                    if (Math.abs(deltaY) > 1) {
+                        card.style.transform = `translateY(${deltaY}px)`;
+                        requestAnimationFrame(() => {
+                            card.style.transition = 'transform 0.5s ease';
+                            card.style.transform = '';
+                        });
+                    }
+                }
+            });
+        }
+    }
+
+    reinicializarLikes();
 }
 
-function generarHTMLPelicula(pelicula) {
+function generateMovieCard(pelicula) {
     return `
         <div class="col-6 col-md-4 col-lg-2">
             <div class="movie-card text-center">
@@ -95,6 +126,10 @@ function initializeLikeButtons() {
     });
 }
 
+function reinicializarLikes() {
+    initializeLikeButtons();
+}
+
 function getCurrentFilters() {
     return {
         titulo: document.getElementById('filterTitulo')?.value || '',
@@ -106,48 +141,24 @@ function getCurrentFilters() {
 }
 
 function handleLikeClick(event) {
+    event.preventDefault();
     const button = event.currentTarget;
     const peliculaId = button.dataset.peliculaId;
-    const currentFilters = getCurrentFilters();
+    const likesOrder = document.getElementById('filterLikes')?.value || '';
     
     fetch('procesar_like.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: `id_pelicula=${peliculaId}&${new URLSearchParams(currentFilters).toString()}`
+        body: `id_pelicula=${peliculaId}&likes_order=${likesOrder}`
     })
     .then(response => response.json())
     .then(data => {
-        if (data.success) {
-            // Actualizar el botón
-            button.classList.toggle('liked');
-            
-            // Actualizar el contador de likes
-            const likeCount = document.getElementById(`likes-${peliculaId}`);
-            if (likeCount) {
-                likeCount.textContent = `${data.likes} Likes`;
-            }
-            
-            // Actualizar solo el Top 5
-            if (data.actualizacion?.top5) {
-                updateTop5Interface(data.actualizacion.top5);
-            }
-
-            // Para la sección de todas las películas, aplicar los filtros actuales
-            if (data.actualizacion?.todas) {
-                updateTodasInterface(data.actualizacion.todas, currentFilters);
-            }
-
-            // Reinicializar los botones de like después de actualizar la interfaz
-            initializeLikeButtons();
-        } else {
-            console.error('Error:', data.message);
-        }
+        data.pelicula_id = peliculaId;
+        actualizarInterfaz(data);
     })
-    .catch(error => {
-        console.error('Error:', error);
-    });
+    .catch(error => console.error('Error:', error));
 }
 
 function updateTop5Interface(top5Data) {
@@ -207,31 +218,22 @@ function updateTodasInterface(todasData, filters) {
     }
 }
 
-function generateMovieCard(pelicula) {
-    return `
-        <div class="col-6 col-md-4 col-lg-2 mb-4">
-            <div class="movie-card text-center">
-                <a href="detalle_pelicula.php?id=${pelicula.id_pelicula}">
-                    <img src="./img/${pelicula.poster_url}" 
-                         alt="${pelicula.titulo}"
-                         class="img-fluid">
-                </a>
-                <h5 class="movie-title">${pelicula.titulo}</h5>
-                <p class="movie-genres">${pelicula.generos.replace(/,/g, ', ')}</p>
-                <button class="like-btn ${pelicula.user_liked ? 'liked' : ''}"
-                        data-pelicula-id="${pelicula.id_pelicula}">
-                    <i class="fas fa-thumbs-up"></i> Like
-                </button>
-                <div class="like-count" id="likes-${pelicula.id_pelicula}">
-                    ${pelicula.likes} Likes
-                </div>
-            </div>
-        </div>
-    `;
-}
-
 // Inicializar los botones cuando se carga el DOM
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM cargado - Inicializando botones...');
     initializeLikeButtons();
-}); 
+});
+
+// Función para actualizar el Top 5
+function actualizarTop5(top5Peliculas) {
+    const top5Container = document.querySelector('.top5-container');
+    if (!top5Container) return;
+
+    let html = '';
+    top5Peliculas.forEach(pelicula => {
+        html += generateMovieCard(pelicula);
+    });
+
+    top5Container.innerHTML = html;
+    reinicializarLikes();
+} 

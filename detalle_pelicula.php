@@ -36,7 +36,7 @@ $pelicula = getPeliculaById($id_pelicula);
                     <div class="col-md-7">
                         <h1><?php echo htmlspecialchars($pelicula['titulo']); ?></h1>
                         <p><strong>Descripción:</strong> <?php echo htmlspecialchars($pelicula['descripcion']); ?></p>
-                        <p><strong>Categoría:</strong> <?php echo htmlspecialchars($pelicula['categoria']); ?></p>
+                        <p><strong>Géneros:</strong> <?php echo htmlspecialchars(str_replace(',', ', ', $pelicula['generos'])); ?></p>
                         <p><strong>Director:</strong> <?php echo htmlspecialchars($pelicula['director']); ?></p>
                         <p><strong>Likes:</strong> <?php echo htmlspecialchars($pelicula['likes']); ?></p>
                         <a href="index.php" class="btn-netflix">Volver</a>

@@ -16,6 +16,8 @@ try {
     <meta charset="UTF-8">
     <title>Gestión de Películas</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+    <link href="https://stackpath.  bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
             background-color: #141414;
@@ -118,7 +120,7 @@ try {
                 
                 <div class="form-group">
                     <label for="poster">Imagen de la película</label>
-                    <input type="file" class="form-control" id="poster" name="poster" accept="image/*" required>
+                    <input type="file" class="form-control" id="poster" name="poster" accept="image/*">
                     <small class="form-text text-muted">Formatos permitidos: JPG, JPEG, PNG. Tamaño máximo: 2MB</small>
                 </div>
                 
@@ -146,6 +148,7 @@ try {
                     <label for="director">Director</label>
                     <input type="text" class="form-control" id="director" name="director" 
                            value="<?= htmlspecialchars($pelicula['director']) ?>" required>
+
                 </div>
                 
                 <div class="form-group">
@@ -162,6 +165,15 @@ try {
                         <option value="Drama" <?= $pelicula['categoria'] == 'Drama' ? 'selected' : '' ?>>Drama</option>
                         <option value="Terror" <?= $pelicula['categoria'] == 'Terror' ? 'selected' : '' ?>>Terror</option>
                     </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="poster">Imagen de la película</label>
+                    <input type="file" class="form-control" id="poster" name="poster" accept="image/*">
+                    <small class="form-text text-muted">Formatos permitidos: JPG, JPEG, PNG. Tamaño máximo: 2MB</small>
+                    <?php if (isset($pelicula) && $pelicula['poster_url'] != "default.jpg"): ?>
+                        <img src="img/<?= htmlspecialchars($pelicula['poster_url']) ?>" alt="Poster actual" style="max-width: 200px; margin-top: 10px;">
+                    <?php endif; ?>
                 </div>
                 
                 <button type="submit" name="accion" value="editar" class="btn btn-primary">Guardar</button>

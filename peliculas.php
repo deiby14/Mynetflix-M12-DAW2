@@ -2,7 +2,11 @@
     require_once 'conexion.php';  // Ya no buscará en includes/
 
 try {
-    $stmt = $conn->query("SELECT * FROM Peliculas ORDER BY likes DESC");
+    $stmt = $conn->query("SELECT p.*, GROUP_CONCAT(g.nombre) as generos FROM Peliculas p
+                           LEFT JOIN Peliculas_Generos pg ON p.id_pelicula = pg.id_pelicula
+                           LEFT JOIN Generos g ON pg.id_genero = g.id_genero
+                           GROUP BY p.id_pelicula
+                           ORDER BY p.likes DESC");
     $peliculas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     echo "Error al obtener las películas: " . $e->getMessage();
@@ -200,7 +204,7 @@ try {
                             <td><?= htmlspecialchars($pelicula['titulo']) ?></td>
                             <td><?= htmlspecialchars($pelicula['director']) ?></td>
                             <td><?= htmlspecialchars($pelicula['fecha_estreno']) ?></td>
-                            <td><?= htmlspecialchars($pelicula['categoria']) ?></td>
+                            <td><?= htmlspecialchars($pelicula['generos']) ?></td>
                             <td><?= htmlspecialchars($pelicula['likes']) ?></td>
                             <td>
                                 <a href="?accion=editar&id=<?= $pelicula['id_pelicula'] ?>" 

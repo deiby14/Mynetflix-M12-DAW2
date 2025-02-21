@@ -126,6 +126,12 @@ function getPeliculasOrdenadas($userId, $filtros = []) {
         $params[] = $filtros['director'];
     }
 
+    if (isset($filtros['user_likes']) && $filtros['user_likes'] === 'con_likes') {
+        $where[] = "l.id_like IS NOT NULL"; // Solo películas que el usuario ha dado like
+    } elseif (isset($filtros['user_likes']) && $filtros['user_likes'] === 'sin_likes') {
+        $where[] = "l.id_like IS NULL"; // Solo películas que el usuario no ha dado like
+    }
+
     if (!empty($where)) {
         $query .= (strpos($query, 'WHERE') === false ? " WHERE " : " AND ") . implode(" AND ", $where);
     }

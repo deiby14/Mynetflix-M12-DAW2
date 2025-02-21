@@ -37,6 +37,8 @@ try {
         $html .= generatePeliculaHTML($pelicula);
     }
     
+    error_log("Películas filtradas: " . print_r($peliculas, true));
+    
     echo json_encode([
         'success' => true,
         'html' => $html,
@@ -62,6 +64,7 @@ try {
         ]
     ]);
 }
+
 
 function generatePeliculaHTML($pelicula) {
     return '

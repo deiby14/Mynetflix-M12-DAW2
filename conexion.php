@@ -2,7 +2,7 @@
 $host = 'localhost'; 
 $dbname = 'db_netflix';
 $username = 'root'; 
-$password = ''; 
+$password = 'Agustin51'; 
 
 try {
   

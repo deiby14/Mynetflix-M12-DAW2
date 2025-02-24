@@ -1,123 +1,141 @@
 <?php
 include 'conexion.php';
-
-try {
-    $stmt = $conn->query("SELECT * FROM Usuarios ORDER BY estado DESC");
-    $usuarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
-} catch (PDOException $e) {
-    echo "Error al obtener los usuarios: " . $e->getMessage();
-    exit();
-}
 ?>
-
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <title>Gestión de Usuarios</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            background-color: #141414;
-            color: #fff;
-        }
-        .table th, .table td {
-            vertical-align: middle;
-        }
-    </style>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body>
-    <div class="container mt-5">
-        <div class="d-flex justify-content-between mb-4">
-            <a href="administrador.php" class="btn btn-secondary">Volver</a>
-            <a href="peliculas.php" class="btn btn-info">Ir a Películas</a>
+
+<body class="bg-dark text-light">
+
+    <!-- Modal de Registro -->
+    <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content bg-dark text-light">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="registerModalLabel">Registrar Usuario</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="registerfrm" method="post">
+                        <div class="mb-3">
+                            <label for="nombre" class="form-label">Nombre</label>
+                            <input name="nombre" type="text" class="form-control" id="nombre" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input name="email" type="email" class="form-control" id="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="contrasena" class="form-label">Contraseña</label>
+                            <input name="contrasena" type="password" class="form-control" id="contrasena" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="es_admin" class="form-label">Rol</label>
+                            <select name="es_admin" id="es_admin" class="form-select">
+                                <option value="admin">Admin</option>
+                                <option value="cliente">Cliente</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="estado" class="form-label">Estado</label>
+                            <select name="estado" id="estado" class="form-select">
+                                <option value="pendiente">Pendiente</option>
+                                <option value="activo">Activo</option>
+                                <option value="inactivo">Inactivo</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button onclick="registrarusuario()" class="btn btn-primary">Crear Usuario</button>
+                </div>
+            </div>
         </div>
-        <h1 class="mb-4">Gestión de Usuarios</h1>
-        <a href="?accion=mostrar_form" class="btn btn-primary mb-3">Añadir Usuario</a>
-        
-        <?php 
-        if(isset($_GET['accion']) && $_GET['accion'] == 'mostrar_form'): 
-        ?>
-            <form action="procesar_usuario.php" method="POST" class="mb-4">
-                <h3>Añadir Usuario</h3>
-                <div class="form-group">
-                    <label for="nombre">Nombre</label>
-                    <input type="text" class="form-control" id="nombre" name="nombre" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="email">Email</label>
-                    <input type="email" class="form-control" id="email" name="email" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="contrasena">Contraseña</label>
-                    <input type="password" class="form-control" id="contrasena" name="contrasena" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="estado">Estado</label>
-                    <select class="form-control" id="estado" name="estado">
-                        <option value="activo">Activo</option>
-                        <option value="inactivo">Inactivo</option>
-                    </select>
-                </div>
+    </div>
 
-                <div class="form-group">
-                    <label for="es_admin">Rol</label>
-                    <select class="form-control" id="es_admin" name="es_admin">
-                        <option value="cliente">Cliente</option>
-                        <option value="admin">Administrador</option>
-                    </select>
-                </div>
-                
-                <button type="submit" name="accion" value="añadir" class="btn btn-primary">Guardar</button>
-                <a href="usuarios.php" class="btn btn-secondary">Cancelar</a>
-            </form>
-        <?php 
-        elseif(isset($_GET['accion']) && $_GET['accion'] == 'editar' && isset($_GET['id'])): 
-            $id = $_GET['id'];
-            $stmt = $conn->prepare("SELECT * FROM Usuarios WHERE id_usuario = ?");
-            $stmt->execute([$id]);
-            $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
-        ?>
-            <form action="procesar_usuario.php" method="POST" class="mb-4">
-                <h3>Editar Usuario</h3>
-                <input type="hidden" name="id" value="<?= htmlspecialchars($usuario['id_usuario']) ?>">
-                
-                <div class="form-group">
-                    <label for="nombre">Nombre</label>
-                    <input type="text" class="form-control" id="nombre" name="nombre" 
-                           value="<?= htmlspecialchars($usuario['nombre']) ?>" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="email">Email</label>
-                    <input type="email" class="form-control" id="email" name="email" 
-                           value="<?= htmlspecialchars($usuario['email']) ?>" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="estado">Estado</label>
-                    <select class="form-control" id="estado" name="estado">
-                        <option value="activo" <?= $usuario['estado'] == 'activo' ? 'selected' : '' ?>>Activo</option>
-                        <option value="inactivo" <?= $usuario['estado'] == 'inactivo' ? 'selected' : '' ?>>Inactivo</option>
-                    </select>
-                </div>
+<!-- Modal de Edición -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content bg-dark text-light">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editModalLabel">Editar Usuario</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <form id="editfrm" method="post">
+          <!-- Campo oculto para el id del usuario -->
+          <input type="hidden" id="id_usuario" name="id_usuario">
+          <div class="mb-3">
+            <label for="edit_nombre" class="form-label">Nombre</label>
+            <input type="text" class="form-control" id="edit_nombre" name="nombre" required>
+          </div>
+          <div class="mb-3">
+            <label for="edit_email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="edit_email" name="email" required>
+          </div>
+          <div class="mb-3">
+            <label for="edit_contrasena" class="form-label">
+              Contraseña (dejar en blanco para no cambiar)
+            </label>
+            <input type="password" class="form-control" id="edit_contrasena" name="contrasena">
+          </div>
+          <div class="mb-3">
+            <label for="edit_es_admin" class="form-label">Rol</label>
+            <select id="edit_es_admin" name="es_admin" class="form-select">
+              <option value="admin">Admin</option>
+              <option value="cliente">Cliente</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="edit_estado" class="form-label">Estado</label>
+            <select id="edit_estado" name="estado" class="form-select">
+              <option value="pendiente">Pendiente</option>
+              <option value="activo">Activo</option>
+              <option value="inactivo">Inactivo</option>
+            </select>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Cerrar
+        </button>
+        <button onclick="actualizarUsuario()" class="btn btn-primary">
+          Guardar Cambios
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 
-                <div class="form-group">
-                    <label for="es_admin">Rol</label>
-                    <select class="form-control" id="es_admin" name="es_admin">
-                        <option value="cliente" <?= $usuario['es_admin'] == 'cliente' ? 'selected' : '' ?>>Cliente</option>
-                        <option value="admin" <?= $usuario['es_admin'] == 'admin' ? 'selected' : '' ?>>Administrador</option>
-                    </select>
-                </div>
-                
-                <button type="submit" name="accion" value="editar" class="btn btn-primary">Guardar</button>
-                <a href="usuarios.php" class="btn btn-secondary">Cancelar</a>
-            </form>
-        <?php endif; ?>
+    <div class="container">
+        <h1 class="text-center my-4">Gestión de Usuarios</h1>
+        <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#registerModal">Registrar Usuario</button>
+          
+        <h2 class="text-light">Usuarios Pendientes</h2>
+        <table class="table table-dark table-hover">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Email</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="usuarios_pendientes">
+            </tbody>
+        </table>
 
+        <h2 class="text-light">Usuarios Activos</h2>
         <table class="table table-dark table-hover">
             <thead>
                 <tr>
@@ -128,26 +146,20 @@ try {
                     <th>Acciones</th>
                 </tr>
             </thead>
-            <tbody>
-                <?php foreach ($usuarios as $usuario): ?>
-                    <tr>
-                        <td><?= htmlspecialchars($usuario['nombre']) ?></td>
-                        <td><?= htmlspecialchars($usuario['email']) ?></td>
-                        <td><?= htmlspecialchars($usuario['estado']) ?></td>
-                        <td><?= htmlspecialchars($usuario['es_admin']) ?></td>
-                        <td>
-                            <a href="?accion=editar&id=<?= $usuario['id_usuario'] ?>" 
-                               class="btn btn-warning btn-sm">Editar</a>
-                            <a href="procesar_usuario.php?accion=eliminar&id=<?= $usuario['id_usuario'] ?>" 
-                               class="btn btn-danger btn-sm" 
-                               onclick="return confirm('¿Estás seguro de que deseas eliminar este usuario?')">
-                                Eliminar
-                            </a>
-                        </td>
-                    </tr>
-                <?php endforeach; ?>
+            <tbody id="usuarios_activos">
             </tbody>
         </table>
     </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Scripts personalizados -->
+    <script src="./js/agregar_usuario.js"></script>
+    <script src="./js/usuarios_activos.js"></script>
+    <script src="./js/usuarios_pendientes.js"></script>
+    <script src="./js/editar_usuario.js"></script>
+
 </body>
+
 </html>

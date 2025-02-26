@@ -2,7 +2,15 @@ setInterval(usuariospendiente, 5000); // 5000 milisegundos = 5 segundos
 
 usuariospendiente();
 function usuariospendiente() {
-  fetch("./consultas_admin/usuarios_pendientes.php", { method: "POST" })
+  const formData = new FormData();
+    formData.append("filter_nombre", document.getElementById("filter_nombre_pendiente").value);
+    formData.append("filter_email", document.getElementById("filter_email_pendiente").value);
+    formData.append("filter_estado", document.getElementById("filter_estado").value);
+
+    fetch("./consultas_admin/usuarios_pendiente_filtro.php", {
+      method: "POST",
+      body: formData
+    })
     .then((response) => {
       if (!response.ok) {
         throw new Error("Error al cargar los datos");
@@ -12,6 +20,7 @@ function usuariospendiente() {
     .then((data) => {
       // console.log(data);
       let tbody = document.getElementById("usuarios_pendientes");
+      tbody.innerHTML = "";
       let tabla = "";
       if (data == "") {
         tabla += "<tr>";
@@ -64,4 +73,17 @@ function aprobar(id) {
         alert("Error al aprobar el usuario: " + data.message);
       }
     })
+}
+
+
+function limpiar_pendiente() {
+
+
+  document.getElementById("filter_nombre_pendiente").value = ""; //
+  document.getElementById("filter_email_pendiente").value = ""; //
+  document.getElementById("filter_estado").value = ""; //
+  usuariospendiente(); // Recarga la lista de usuarios pendientes
+  
+
+  
 }

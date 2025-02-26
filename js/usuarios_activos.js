@@ -1,9 +1,17 @@
-setInterval(usuariosactivos, 5000); // 5000 milisegundos = 5 segundos
+// setInterval(usuariosactivos, 5000); // 5000 milisegundos = 5 segundos
 
 usuariosactivos();
 
 function usuariosactivos() {
-  fetch("./consultas_admin/usuarios_activos.php", { method: "POST" })
+  const formData = new FormData();
+    formData.append("filter_nombre", document.getElementById("filter_nombre_activo").value);
+    formData.append("filter_email", document.getElementById("filter_email_activo").value);
+    formData.append("filter_rol", document.getElementById("filter_rol_activo").value);
+  
+    fetch("./consultas_admin/usuarios_activo_filtro.php", {
+      method: "POST",
+      body: formData
+    })
     .then((response) => {
       if (!response.ok) {
         throw new Error("Error al cargar los datos");
@@ -14,7 +22,9 @@ function usuariosactivos() {
     })
     .then((data) => {
       // console.log(data);
+
       let tbody = document.getElementById("usuarios_activos");
+      tbody.innerHTML = "";
       let tabla = "";
       data.forEach((informacion) => {
         tabla += "<tr>";
@@ -92,3 +102,14 @@ function editarUsuario() {
   });
 }
 
+
+function limpiar_activos() {
+  
+  document.getElementById("filter_nombre_activo").value = ""; //
+  document.getElementById("filter_email_activo").value = ""; //
+  document.getElementById("filter_rol_activo").value = ""; //
+  usuariosactivos(); // Recarga la lista de usuarios activos
+  
+
+  
+}

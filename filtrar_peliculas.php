@@ -1,37 +1,44 @@
 <?php
     require_once 'conexion.php';  // Ya no buscará en includes/
 
-// Debug: Ver los datos recibidos
-error_log('POST data: ' . print_r($_POST, true));
+// Obtener los parámetros de filtrado
+$titulo = $_POST['titulo'] ?? '';
+$director = $_POST['director'] ?? '';
+$categoria = $_POST['categoria'] ?? '';
+$fecha = $_POST['fecha'] ?? '';
+$orden = $_POST['orden'] ?? 'DESC';
 
 // Construir la consulta SQL base
-$sql = "SELECT * FROM Peliculas WHERE 1=1";
+$sql = "SELECT p.*, GROUP_CONCAT(g.nombre) as generos 
+        FROM Peliculas p
+        LEFT JOIN Peliculas_Generos pg ON p.id_pelicula = pg.id_pelicula
+        LEFT JOIN Generos g ON pg.id_genero = g.id_genero
+        WHERE 1=1";
 $params = [];
 
-// Aplicar filtros si existen
-if (!empty($_POST['titulo'])) {
-    $sql .= " AND titulo LIKE ?";
-    $params[] = '%' . $_POST['titulo'] . '%';
+// Añadir condiciones según los filtros
+if (!empty($titulo)) {
+    $sql .= " AND p.titulo LIKE ?";
+    $params[] = "%$titulo%";
 }
 
-if (!empty($_POST['director'])) {
-    $sql .= " AND director LIKE ?";
-    $params[] = '%' . $_POST['director'] . '%';
+if (!empty($director)) {
+    $sql .= " AND p.director LIKE ?";
+    $params[] = "%$director%";
 }
 
-if (!empty($_POST['categoria'])) {
-    $sql .= " AND categoria = ?";
-    $params[] = $_POST['categoria'];
+if (!empty($categoria)) {
+    $sql .= " AND g.nombre = ?";
+    $params[] = $categoria;
 }
 
-if (!empty($_POST['fecha'])) {
-    $sql .= " AND YEAR(fecha_estreno) = ?";
-    $params[] = $_POST['fecha'];
+if (!empty($fecha)) {
+    $sql .= " AND YEAR(p.fecha_estreno) = ?";
+    $params[] = $fecha;
 }
 
-// Ordenar por likes usando CONVERT para asegurar ordenamiento numérico
-$orden = isset($_POST['orden']) ? strtoupper($_POST['orden']) : 'DESC';
-$sql .= " ORDER BY CONVERT(likes, SIGNED INTEGER) " . $orden;
+// Agrupar por película y ordenar
+$sql .= " GROUP BY p.id_pelicula ORDER BY p.likes " . ($orden === 'ASC' ? 'ASC' : 'DESC');
 
 // Debug: Ver la consulta SQL final
 error_log('SQL Query: ' . $sql);
@@ -45,43 +52,12 @@ try {
     // Debug: Ver resultados
     error_log('Número de resultados: ' . count($peliculas));
 
-    // Generar la tabla HTML
-    ?>
-    <table class="table table-dark table-hover">
-        <thead>
-            <tr>
-                <th>Título</th>
-                <th>Director</th>
-                <th>Fecha de Estreno</th>
-                <th>Categoría</th>
-                <th>Likes</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($peliculas as $pelicula): ?>
-                <tr>
-                    <td><?= htmlspecialchars($pelicula['titulo']) ?></td>
-                    <td><?= htmlspecialchars($pelicula['director']) ?></td>
-                    <td><?= htmlspecialchars($pelicula['fecha_estreno']) ?></td>
-                    <td><?= htmlspecialchars($pelicula['categoria']) ?></td>
-                    <td><?= htmlspecialchars($pelicula['likes']) ?></td>
-                    <td>
-                        <a href="?accion=editar&id=<?= $pelicula['id_pelicula'] ?>" 
-                           class="btn btn-warning btn-sm">Editar</a>
-                        <a href="procesar_pelicula.php?accion=eliminar&id=<?= $pelicula['id_pelicula'] ?>" 
-                           class="btn btn-danger btn-sm" 
-                           onclick="return confirm('¿Estás seguro de que deseas eliminar esta película?')">
-                            Eliminar
-                        </a>
-                    </td>
-                </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
-    <?php
+    // Devolver los resultados como JSON
+    header('Content-Type: application/json');
+    echo json_encode($peliculas);
 } catch (PDOException $e) {
     error_log('Error en la consulta: ' . $e->getMessage());
-    echo "Error al filtrar las películas: " . $e->getMessage();
+    http_response_code(500);
+    echo json_encode(['error' => 'Error al filtrar las películas: ' . $e->getMessage()]);
 }
 ?> 

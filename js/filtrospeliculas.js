@@ -62,8 +62,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <a href="?accion=editar&id=${pelicula.id_pelicula}" 
                        class="btn btn-warning btn-sm">Editar</a>
                     <a href="procesar_pelicula.php?accion=eliminar&id=${pelicula.id_pelicula}" 
-                       class="btn btn-danger btn-sm" 
-                       onclick="return confirm('¿Estás seguro de que deseas eliminar esta película?')">
+                       class="btn btn-danger btn-sm">
                         Eliminar
                     </a>
                 </td>

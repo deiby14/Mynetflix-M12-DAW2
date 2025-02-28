@@ -1,95 +1,186 @@
 <?php
-include 'conexion.php';
+require_once 'conexion.php';
 
-function procesarImagen($archivo) {
+function subirImagen($archivo) {
     $directorio_destino = "img/";
-    $extension = strtolower(pathinfo($archivo["name"], PATHINFO_EXTENSION));
-    $nombre_archivo = uniqid() . "." . $extension;
+    $nombre_archivo = uniqid() . "_" . basename($archivo["name"]);
     $ruta_destino = $directorio_destino . $nombre_archivo;
-
-    // Verificar el tipo de archivo
-    $permitidos = array("jpg", "jpeg", "png");
-    if (!in_array($extension, $permitidos)) {
+    
+    // Verificar tipo de archivo
+    $tipo_archivo = strtolower(pathinfo($ruta_destino, PATHINFO_EXTENSION));
+    if($tipo_archivo != "jpg" && $tipo_archivo != "jpeg" && $tipo_archivo != "png") {
         throw new Exception("Solo se permiten archivos JPG, JPEG y PNG.");
     }
-
-    // Verificar el tamaño (2MB máximo)
-    if ($archivo["size"] > 2 * 1024 * 1024) {
+    
+    // Verificar tamaño (2MB máximo)
+    if ($archivo["size"] > 2000000) {
         throw new Exception("El archivo es demasiado grande. Máximo 2MB.");
     }
-
-    // Mover el archivo
-    if (!move_uploaded_file($archivo["tmp_name"], $ruta_destino)) {
+    
+    if (move_uploaded_file($archivo["tmp_name"], $ruta_destino)) {
+        return $nombre_archivo;
+    } else {
         throw new Exception("Error al subir el archivo.");
     }
-
-    return $nombre_archivo;
 }
 
 try {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        // Procesar formulario de añadir/editar
+        // Añadir película
         if ($_POST['accion'] === 'añadir') {
-            $poster_url = "default.jpg"; // Valor por defecto
-            if (isset($_FILES["poster"]) && $_FILES["poster"]["error"] == 0) {
-                $poster_url = procesarImagen($_FILES["poster"]);
+            $conn->beginTransaction();
+
+            // Verificar que se hayan seleccionado categorías
+            if (!isset($_POST['categorias']) || empty($_POST['categorias'])) {
+                throw new Exception("Debes seleccionar al menos una categoría.");
             }
 
-            $stmt = $conn->prepare("INSERT INTO Peliculas (titulo, director, fecha_estreno, categoria, poster_url) VALUES (?, ?, ?, ?, ?)");
+            // Procesar la imagen
+            $poster_url = "default.jpg";
+            if (isset($_FILES['poster']) && $_FILES['poster']['error'] === UPLOAD_ERR_OK) {
+                $poster_url = subirImagen($_FILES['poster']);
+            }
+
+            // Insertar la película
+            $stmt = $conn->prepare("INSERT INTO Peliculas (titulo, director, fecha_estreno, poster_url, likes) 
+                                  VALUES (?, ?, ?, ?, 0)");
             $stmt->execute([
                 $_POST['titulo'],
                 $_POST['director'],
                 $_POST['fecha_estreno'],
-                $_POST['categoria'],
                 $poster_url
             ]);
-        } 
-        elseif ($_POST['accion'] === 'editar') {
-            $poster_url = null;
-            if (isset($_FILES["poster"]) && $_FILES["poster"]["error"] == 0) {
-                $poster_url = procesarImagen($_FILES["poster"]);
-                
-                // Eliminar la imagen anterior si existe y no es la default
-                $stmt = $conn->prepare("SELECT poster_url FROM Peliculas WHERE id_pelicula = ?");
-                $stmt->execute([$_POST['id']]);
-                $old_poster = $stmt->fetchColumn();
-                if ($old_poster && $old_poster != "default.jpg" && file_exists("img/" . $old_poster)) {
-                    unlink("img/" . $old_poster);
+
+            $id_pelicula = $conn->lastInsertId();
+
+            // Procesar categorías
+            foreach ($_POST['categorias'] as $categoria) {
+                // Verificar si la categoría existe
+                $stmt = $conn->prepare("SELECT id_genero FROM Generos WHERE nombre = ?");
+                $stmt->execute([$categoria]);
+                $genero = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                if (!$genero) {
+                    // Crear nuevo género si no existe
+                    $stmt = $conn->prepare("INSERT INTO Generos (nombre) VALUES (?)");
+                    $stmt->execute([$categoria]);
+                    $id_genero = $conn->lastInsertId();
+                } else {
+                    $id_genero = $genero['id_genero'];
                 }
+
+                // Asociar película con género
+                $stmt = $conn->prepare("INSERT INTO Peliculas_Generos (id_pelicula, id_genero) VALUES (?, ?)");
+                $stmt->execute([$id_pelicula, $id_genero]);
             }
 
-            if ($poster_url) {
-                $stmt = $conn->prepare("UPDATE Peliculas SET titulo = ?, director = ?, fecha_estreno = ?, categoria = ?, poster_url = ? WHERE id_pelicula = ?");
-                $stmt->execute([
-                    $_POST['titulo'],
-                    $_POST['director'],
-                    $_POST['fecha_estreno'],
-                    $_POST['categoria'],
-                    $poster_url,
-                    $_POST['id']
-                ]);
-            } else {
-                $stmt = $conn->prepare("UPDATE Peliculas SET titulo = ?, director = ?, fecha_estreno = ?, categoria = ? WHERE id_pelicula = ?");
-                $stmt->execute([
-                    $_POST['titulo'],
-                    $_POST['director'],
-                    $_POST['fecha_estreno'],
-                    $_POST['categoria'],
-                    $_POST['id']
-                ]);
+            $conn->commit();
+            header("Location: peliculas.php?mensaje=Película añadida correctamente");
+            exit();
+        }
+        
+        // Editar película
+        elseif ($_POST['accion'] === 'editar') {
+            $conn->beginTransaction();
+
+            // Verificar que se hayan seleccionado categorías
+            if (!isset($_POST['categorias']) || empty($_POST['categorias'])) {
+                throw new Exception("Debes seleccionar al menos una categoría.");
             }
+
+            $id_pelicula = $_POST['id'];
+            $poster_actual = $_POST['poster_actual'] ?? 'default.jpg';
+
+            // Procesar la imagen
+            if (isset($_FILES['poster']) && $_FILES['poster']['error'] === UPLOAD_ERR_OK) {
+                if ($poster_actual !== 'default.jpg' && file_exists("img/" . $poster_actual)) {
+                    unlink("img/" . $poster_actual);
+                }
+                $poster_url = subirImagen($_FILES['poster']);
+            } else {
+                $poster_url = $poster_actual;
+            }
+
+            // Actualizar la película
+            $stmt = $conn->prepare("UPDATE Peliculas SET 
+                                  titulo = ?, 
+                                  director = ?, 
+                                  fecha_estreno = ?,
+                                  poster_url = ?
+                                  WHERE id_pelicula = ?");
+            $stmt->execute([
+                $_POST['titulo'],
+                $_POST['director'],
+                $_POST['fecha_estreno'],
+                $poster_url,
+                $id_pelicula
+            ]);
+
+            // Eliminar categorías anteriores
+            $stmt = $conn->prepare("DELETE FROM Peliculas_Generos WHERE id_pelicula = ?");
+            $stmt->execute([$id_pelicula]);
+
+            // Procesar nuevas categorías
+            foreach ($_POST['categorias'] as $categoria) {
+                // Verificar si la categoría existe
+                $stmt = $conn->prepare("SELECT id_genero FROM Generos WHERE nombre = ?");
+                $stmt->execute([$categoria]);
+                $genero = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                if (!$genero) {
+                    // Crear nuevo género si no existe
+                    $stmt = $conn->prepare("INSERT INTO Generos (nombre) VALUES (?)");
+                    $stmt->execute([$categoria]);
+                    $id_genero = $conn->lastInsertId();
+                } else {
+                    $id_genero = $genero['id_genero'];
+                }
+
+                // Asociar película con género
+                $stmt = $conn->prepare("INSERT INTO Peliculas_Generos (id_pelicula, id_genero) VALUES (?, ?)");
+                $stmt->execute([$id_pelicula, $id_genero]);
+            }
+
+            $conn->commit();
+            header("Location: peliculas.php?mensaje=Película actualizada correctamente");
+            exit();
         }
     }
+    
+    // Eliminar película
     elseif ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['accion']) && $_GET['accion'] === 'eliminar') {
-        // Procesar eliminación
+        $conn->beginTransaction();
+
+        $id_pelicula = $_GET['id'];
+
+        // Primero obtener información de la película
+        $stmt = $conn->prepare("SELECT poster_url FROM Peliculas WHERE id_pelicula = ?");
+        $stmt->execute([$id_pelicula]);
+        $pelicula = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        // Eliminar primero las relaciones en peliculas_generos
+        $stmt = $conn->prepare("DELETE FROM Peliculas_Generos WHERE id_pelicula = ?");
+        $stmt->execute([$id_pelicula]);
+
+        // Luego eliminar la película
         $stmt = $conn->prepare("DELETE FROM Peliculas WHERE id_pelicula = ?");
-        $stmt->execute([$_GET['id']]);
+        $stmt->execute([$id_pelicula]);
+
+        // Finalmente eliminar la imagen si existe
+        if ($pelicula && $pelicula['poster_url'] !== 'default.jpg' && file_exists("img/" . $pelicula['poster_url'])) {
+            unlink("img/" . $pelicula['poster_url']);
+        }
+
+        $conn->commit();
+        header("Location: peliculas.php?mensaje=Película eliminada correctamente");
+        exit();
     }
 
-    // Redireccionar de vuelta a la página principal
-    header('Location: peliculas.php');
+} catch (Exception $e) {
+    if (isset($conn)) {
+        $conn->rollBack();
+    }
+    header("Location: peliculas.php?error=" . urlencode($e->getMessage()));
     exit();
-} catch (PDOException $e) {
-    die("Error: " . $e->getMessage());
 }
 ?>

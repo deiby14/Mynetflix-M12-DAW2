@@ -3,6 +3,8 @@
 
 <head>
   <meta charset="UTF-8">
+  <!-- Agregamos la etiqueta viewport para la responsividad -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Gestión de Usuarios</title>
   <!-- Bootstrap 5 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -12,7 +14,7 @@
 
   <!-- Modal de Registro -->
   <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content bg-dark text-light">
         <div class="modal-header">
           <h5 class="modal-title" id="registerModalLabel">Registrar Usuario</h5>
@@ -61,7 +63,7 @@
 
   <!-- Modal de Edición -->
   <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content bg-dark text-light">
         <div class="modal-header">
           <h5 class="modal-title" id="editModalLabel">Editar Usuario</h5>
@@ -124,11 +126,12 @@
     }
     ?>
 
-    <div class="d-flex justify-content-between mb-4">
+    <div class="d-flex justify-content-center gap-3">
       <a href="administrador.php" class="btn btn-secondary">Volver</a>
       <a href="peliculas.php" class="btn btn-info">Ir a Películas</a>
+      <a href="cerrar_sesion.php" class="btn btn-warning">Logout</a>
     </div>
-    
+
     <h1 class="mb-4">Gestión de Usuarios</h1>
     <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#registerModal">Registrar Usuario</button>
 
@@ -154,16 +157,19 @@
         <button class="btn btn-primary" onclick="limpiar_pendiente()">Borrar</button>
       </div>
     </div>
-    <table class="table table-dark table-hover">
-      <thead>
-        <tr>
-          <th>Nombre</th>
-          <th>Email</th>
-          <th>Estado</th>
-        </tr>
-      </thead>
-      <tbody id="usuarios_pendientes"></tbody>
-    </table>
+    <!-- Se agrega el contenedor responsive sin quitar la tabla original -->
+    <div class="table-responsive">
+      <table class="table table-dark table-hover">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Email</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody id="usuarios_pendientes"></tbody>
+      </table>
+    </div>
 
     <!-- Sección para Usuarios Activos -->
     <h2 class="text-light">Usuarios Activos</h2>
@@ -186,18 +192,21 @@
         <button class="btn btn-primary" onclick="limpiar_activos()">Borrar</button>
       </div>
     </div>
-    <table class="table table-dark table-hover">
-      <thead>
-        <tr>
-          <th>Nombre</th>
-          <th>Email</th>
-          <th>Estado</th>
-          <th>Rol</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody id="usuarios_activos"></tbody>
-    </table>
+    <!-- Se agrega el contenedor responsive sin quitar la tabla original -->
+    <div class="table-responsive">
+      <table class="table table-dark table-hover">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Email</th>
+            <th>Estado</th>
+            <th>Rol</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="usuarios_activos"></tbody>
+      </table>
+    </div>
   </div>
 
   <!-- Bootstrap 5 JS -->

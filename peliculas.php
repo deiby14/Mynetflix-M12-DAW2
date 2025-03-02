@@ -1,6 +1,6 @@
 <?php
-    require_once 'conexion.php';  // Ya no buscará en includes/
 
+require_once 'conexion.php';  
 try {
     $stmt = $conn->query("SELECT p.*, GROUP_CONCAT(g.nombre) as generos FROM Peliculas p
                            LEFT JOIN Peliculas_Generos pg ON p.id_pelicula = pg.id_pelicula
@@ -22,22 +22,16 @@ try {
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 
     <link href="https://stackpath.  bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            background-color: #141414;
-            color: #fff;
-        }
-        .table th, .table td {
-            vertical-align: middle;
-        }
-    </style>
+
 </head>
-<body>
+<body class="bg-dark text-light">
     <div class="container mt-5">
-        <div class="d-flex justify-content-between mb-4">
-            <a href="administrador.php" class="btn btn-secondary">Volver</a>
-            <a href="usuarios.php" class="btn btn-info">Ir a Usuarios</a>
-        </div>
+    <div class="d-flex justify-content-center gap-3">
+      <a href="administrador.php" class="btn btn-secondary">Volver</a>
+      <a href="usuarios.php" class="btn btn-info">Ir a Usuarios</a>
+      <a href="cerrar_sesion.php" class="btn btn-warning">Logout</a>
+  </div>
+        
         <h1 class="mb-4">Gestión de Películas</h1>
         
         <!-- Filtros -->

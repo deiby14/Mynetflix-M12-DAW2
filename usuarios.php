@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <title>Gestión de Usuarios</title>
   <!-- Bootstrap 5 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
+
 <body class="bg-dark text-light">
 
   <!-- Modal de Registro -->
@@ -33,6 +35,7 @@
             <div class="mb-3">
               <label for="es_admin" class="form-label">Rol</label>
               <select name="es_admin" id="es_admin" class="form-select">
+                <option value="">Seleccione un rol</option>
                 <option value="admin">Admin</option>
                 <option value="cliente">Cliente</option>
               </select>
@@ -40,6 +43,7 @@
             <div class="mb-3">
               <label for="estado" class="form-label">Estado</label>
               <select name="estado" id="estado" class="form-select">
+                <option value="">Seleccione un estado</option>
                 <option value="pendiente">Pendiente</option>
                 <option value="activo">Activo</option>
                 <option value="inactivo">Inactivo</option>
@@ -82,6 +86,7 @@
             <div class="mb-3">
               <label for="edit_es_admin" class="form-label">Rol</label>
               <select id="edit_es_admin" name="es_admin" class="form-select">
+                <option value="">Seleccione un rol</option>
                 <option value="admin">Admin</option>
                 <option value="cliente">Cliente</option>
               </select>
@@ -89,6 +94,7 @@
             <div class="mb-3">
               <label for="edit_estado" class="form-label">Estado</label>
               <select id="edit_estado" name="estado" class="form-select">
+                <option value="">Seleccione un estado</option>
                 <option value="pendiente">Pendiente</option>
                 <option value="activo">Activo</option>
                 <option value="inactivo">Inactivo</option>
@@ -105,43 +111,47 @@
   </div>
 
   <div class="container">
+    <div class="d-flex justify-content-between py-3">
+      <a href="administrador.php" class="btn btn-secondary">Volver</a>
+      <a href="peliculas.php" class="btn btn-info">Ir a Peliculas</a>
+    </div>
     <h1 class="text-center my-4">Gestión de Usuarios</h1>
     <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#registerModal">Registrar Usuario</button>
 
-<!-- Sección para Usuarios Pendientes -->
-<h2 class="text-light">Usuarios Pendientes</h2>
-<div class="row mb-3">
-  <div class="col">
-    <input type="text" id="filter_nombre_pendiente" class="form-control" placeholder="Filtrar por nombre">
-  </div>
-  <div class="col">
-    <input type="text" id="filter_email_pendiente" class="form-control" placeholder="Filtrar por email">
-  </div>
-  <div class="col">
-  <select id="filter_estado" class="form-select">
+    <!-- Sección para Usuarios Pendientes -->
+    <h2 class="text-light">Usuarios Pendientes</h2>
+    <div class="row mb-3">
+      <div class="col">
+        <input type="text" id="filter_nombre_pendiente" class="form-control" placeholder="Filtrar por nombre">
+      </div>
+      <div class="col">
+        <input type="text" id="filter_email_pendiente" class="form-control" placeholder="Filtrar por email">
+      </div>
+      <div class="col">
+        <select id="filter_estado" class="form-select">
           <option value="">Todos los estado</option>
           <option value="activo">Activo</option>
           <option value="inactivo">Inactivo</option>
           <option value="pendiente">Pendiente</option>
 
         </select>
-  </div>
-  <div class="col">
-    <button class="btn btn-primary" onclick="usuariospendiente()">Filtrar</button>
-    <button class="btn btn-primary" onclick="limpiar_pendiente()">borrar</button>
-  </div>
-  
-</div>
-<table class="table table-dark table-hover">
-  <thead>
-    <tr>
-      <th>Nombre</th>
-      <th>Email</th>
-      <th>Estado</th>
-    </tr>
-  </thead>
-  <tbody id="usuarios_pendientes"></tbody>
-</table>
+      </div>
+      <div class="col">
+        <button class="btn btn-primary" onclick="usuariospendiente()">Filtrar</button>
+        <button class="btn btn-primary" onclick="limpiar_pendiente()">borrar</button>
+      </div>
+
+    </div>
+    <table class="table table-dark table-hover">
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Email</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody id="usuarios_pendientes"></tbody>
+    </table>
 
 
 
@@ -165,9 +175,9 @@
         <button class="btn btn-primary" onclick="usuariosactivos()">Filtrar</button>
         <button class="btn btn-primary" onclick="limpiar_activos()">borrar</button>
       </div>
-     
-    
-  
+
+
+
     </div>
     <table class="table table-dark table-hover">
       <thead>
@@ -192,5 +202,7 @@
   <script src="./js/usuarios_pendientes.js"></script>
   <script src="./js/filtro_activo.js"></script>
   <script src="./js/filtro_pendiente.js"></script>
+  <script src="./js/validate_admin_usu.js"></script>
 </body>
+
 </html>

@@ -112,14 +112,20 @@ try {
                 </div>
                 
                 <div class="form-group">
-                    <label for="categoria">Categoría</label>
-                    <select class="form-control" id="categoria" name="categoria" required>
-                        <option value="">Seleccione una categoría</option>
-                        <option value="Acción">Acción</option>
-                        <option value="Comedia">Comedia</option>
-                        <option value="Drama">Drama</option>
-                        <option value="Terror">Terror</option>
+                    <label for="categorias">Categorías</label>
+                    <select multiple class="form-control" id="categorias" name="categorias[]" required>
+                        <option value="">Selecciona las categorías</option>
+                        <?php
+                        // Obtener todas las categorías disponibles
+                        $stmt = $conn->query("SELECT DISTINCT nombre FROM Generos ORDER BY nombre");
+                        $categorias = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                        foreach ($categorias as $categoria): ?>
+                            <option value="<?= htmlspecialchars($categoria['nombre']) ?>">
+                                <?= htmlspecialchars($categoria['nombre']) ?>
+                            </option>
+                        <?php endforeach; ?>
                     </select>
+                    <small class="form-text text-muted">Puedes buscar y seleccionar múltiples categorías</small>
                 </div>
                 
                 <div class="form-group">
@@ -162,13 +168,29 @@ try {
                 </div>
                 
                 <div class="form-group">
-                    <label for="categoria">Categoría</label>
-                    <select class="form-control" id="categoria" name="categoria" required>
-                        <option value="Acción" <?= $pelicula['categoria'] == 'Acción' ? 'selected' : '' ?>>Acción</option>
-                        <option value="Comedia" <?= $pelicula['categoria'] == 'Comedia' ? 'selected' : '' ?>>Comedia</option>
-                        <option value="Drama" <?= $pelicula['categoria'] == 'Drama' ? 'selected' : '' ?>>Drama</option>
-                        <option value="Terror" <?= $pelicula['categoria'] == 'Terror' ? 'selected' : '' ?>>Terror</option>
+                    <label for="categorias">Categorías</label>
+                    <select multiple class="form-control" id="categorias" name="categorias[]" required>
+                        <?php
+                        // Obtener todas las categorías disponibles
+                        $stmt = $conn->query("SELECT DISTINCT nombre FROM Generos ORDER BY nombre");
+                        $categorias = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                        
+                        // Obtener las categorías actuales de la película
+                        $stmt = $conn->prepare("SELECT g.nombre 
+                                               FROM Generos g 
+                                               JOIN Peliculas_Generos pg ON g.id_genero = pg.id_genero 
+                                               WHERE pg.id_pelicula = ?");
+                        $stmt->execute([$id]);
+                        $categorias_actuales = $stmt->fetchAll(PDO::FETCH_COLUMN);
+                        
+                        foreach ($categorias as $categoria): ?>
+                            <option value="<?= htmlspecialchars($categoria['nombre']) ?>" 
+                                    <?= in_array($categoria['nombre'], $categorias_actuales) ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($categoria['nombre']) ?>
+                            </option>
+                        <?php endforeach; ?>
                     </select>
+                    <small class="form-text text-muted">Puedes buscar y seleccionar múltiples categorías</small>
                 </div>
                 
                 <div class="form-group">
@@ -210,8 +232,7 @@ try {
                                 <a href="?accion=editar&id=<?= $pelicula['id_pelicula'] ?>" 
                                    class="btn btn-warning btn-sm">Editar</a>
                                 <a href="procesar_pelicula.php?accion=eliminar&id=<?= $pelicula['id_pelicula'] ?>" 
-                                   class="btn btn-danger btn-sm" 
-                                   onclick="return confirm('¿Estás seguro de que deseas eliminar esta película?')">
+                                   class="btn btn-danger btn-sm btn-eliminar">
                                     Eliminar
                                 </a>
                             </td>
@@ -222,7 +243,125 @@ try {
         </div>
     </div>
 
-    <!-- Añade estos scripts al final del body -->
-    <script src="js/filtros.js"></script>
+    <!-- Modal de confirmación de eliminación -->
+    <div class="modal fade" id="modalEliminar" tabindex="-1" role="dialog" aria-labelledby="modalEliminarLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content bg-dark text-white">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title" id="modalEliminarLabel">Confirmar eliminación</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>¿Estás seguro de que deseas eliminar la película "<span id="peliculaAEliminar"></span>"?</p>
+                    <p class="text-danger mb-0">Esta acción no se puede deshacer.</p>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <a href="#" id="btnConfirmarEliminar" class="btn btn-danger">Eliminar</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- Añadir Select2 -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-theme@0.1.0-beta.10/dist/select2-bootstrap.min.css" rel="stylesheet">
+    <script src="js/filtrospeliculas.js"></script>
+
+    <!-- Script para el modal y Select2 -->
+    <script>
+    $(document).ready(function() {
+        // Inicializar Select2 para las categorías
+        $('#categorias').select2({
+            theme: 'bootstrap',
+            placeholder: 'Selecciona las categorías',
+            width: '100%',
+            language: {
+                noResults: function() {
+                    return "No se encontraron resultados";
+                }
+            }
+        });
+
+        // Manejar el modal de eliminación
+        $('.btn-eliminar').click(function(e) {
+            e.preventDefault();
+            var deleteUrl = $(this).attr('href');
+            var titulo = $(this).closest('tr').find('td:first').text();
+            $('#peliculaAEliminar').text(titulo);
+            $('#btnConfirmarEliminar').attr('href', deleteUrl);
+            $('#modalEliminar').modal('show');
+        });
+    });
+    </script>
+
+    <style>
+    /* Estilos para Select2 */
+    .select2-container--bootstrap .select2-selection {
+        background-color: #2c3034;
+        border: 1px solid #444;
+        color: white;
+    }
+
+    .select2-container--bootstrap .select2-selection--multiple {
+        min-height: 38px;
+    }
+
+    .select2-container--bootstrap .select2-selection--multiple .select2-selection__choice {
+        background-color: #007bff;
+        border-color: #0056b3;
+        color: #fff;
+        padding: 2px 8px;
+    }
+
+    .select2-container--bootstrap .select2-selection--multiple .select2-selection__choice__remove {
+        color: #fff;
+        margin-right: 5px;
+    }
+
+    /* Estilos para el dropdown de Select2 */
+    .select2-container--bootstrap .select2-dropdown {
+        background-color: #2c3034;
+        border: 1px solid #444;
+    }
+
+    .select2-container--bootstrap .select2-results__option {
+        color: white;
+        padding: 6px 12px;
+    }
+
+    .select2-container--bootstrap .select2-results__option[aria-selected=true] {
+        background-color: #007bff;
+        color: white;
+    }
+
+    .select2-container--bootstrap .select2-results__option--highlighted[aria-selected] {
+        background-color: #0056b3;
+        color: white;
+    }
+
+    .select2-search--dropdown .select2-search__field {
+        background-color: #343a40;
+        color: white;
+        border: 1px solid #444;
+    }
+
+    .select2-container--bootstrap .select2-selection--multiple .select2-search--inline .select2-search__field {
+        background-color: transparent;
+        color: white;
+    }
+
+    /* Placeholder color */
+    .select2-container--bootstrap .select2-selection--multiple .select2-search--inline .select2-search__field::placeholder {
+        color: #aaa;
+    }
+    </style>
 </body>
 </html>

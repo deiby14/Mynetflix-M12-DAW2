@@ -110,12 +110,26 @@
     </div>
   </div>
 
-  <div class="container">
-    <div class="d-flex justify-content-between py-3">
+  <div class="container mt-5">
+    <?php
+    // Mostrar mensajes de éxito o error si existen
+    if (isset($_SESSION['mensaje'])) {
+      $tipo = isset($_SESSION['mensaje_tipo']) ? htmlspecialchars($_SESSION['mensaje_tipo']) : 'info';
+      echo '<div class="alert alert-' . $tipo . ' alert-dismissible fade show" role="alert">';
+      echo htmlspecialchars($_SESSION['mensaje']);
+      echo '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
+      echo '</div>';
+      unset($_SESSION['mensaje']);
+      unset($_SESSION['mensaje_tipo']);
+    }
+    ?>
+
+    <div class="d-flex justify-content-between mb-4">
       <a href="administrador.php" class="btn btn-secondary">Volver</a>
-      <a href="peliculas.php" class="btn btn-info">Ir a Peliculas</a>
+      <a href="peliculas.php" class="btn btn-info">Ir a Películas</a>
     </div>
-    <h1 class="text-center my-4">Gestión de Usuarios</h1>
+    
+    <h1 class="mb-4">Gestión de Usuarios</h1>
     <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#registerModal">Registrar Usuario</button>
 
     <!-- Sección para Usuarios Pendientes -->
@@ -129,18 +143,16 @@
       </div>
       <div class="col">
         <select id="filter_estado" class="form-select">
-          <option value="">Todos los estado</option>
+          <option value="">Todos los estados</option>
           <option value="activo">Activo</option>
           <option value="inactivo">Inactivo</option>
           <option value="pendiente">Pendiente</option>
-
         </select>
       </div>
       <div class="col">
         <button class="btn btn-primary" onclick="usuariospendiente()">Filtrar</button>
-        <button class="btn btn-primary" onclick="limpiar_pendiente()">borrar</button>
+        <button class="btn btn-primary" onclick="limpiar_pendiente()">Borrar</button>
       </div>
-
     </div>
     <table class="table table-dark table-hover">
       <thead>
@@ -152,8 +164,6 @@
       </thead>
       <tbody id="usuarios_pendientes"></tbody>
     </table>
-
-
 
     <!-- Sección para Usuarios Activos -->
     <h2 class="text-light">Usuarios Activos</h2>
@@ -173,11 +183,8 @@
       </div>
       <div class="col">
         <button class="btn btn-primary" onclick="usuariosactivos()">Filtrar</button>
-        <button class="btn btn-primary" onclick="limpiar_activos()">borrar</button>
+        <button class="btn btn-primary" onclick="limpiar_activos()">Borrar</button>
       </div>
-
-
-
     </div>
     <table class="table table-dark table-hover">
       <thead>
@@ -203,6 +210,13 @@
   <script src="./js/filtro_activo.js"></script>
   <script src="./js/filtro_pendiente.js"></script>
   <script src="./js/validate_admin_usu.js"></script>
+
+  <?php
+  // Cerrar la conexión a la base de datos si existe
+  if (isset($conn)) {
+    $conn = null;
+  }
+  ?>
 </body>
 
 </html>

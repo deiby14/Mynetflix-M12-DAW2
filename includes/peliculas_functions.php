@@ -1,6 +1,8 @@
 <?php
 require_once 'conexion.php';
 
+$conn->query("SET SESSION sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''))");
+
 function getPeliculasWithUserLikes($userId) {
     global $conn;
     
@@ -86,7 +88,7 @@ function getPeliculasOrdenadas($userId, $filtros = []) {
     // Consulta base
     $query = "SELECT DISTINCT p.*,
               GROUP_CONCAT(DISTINCT g.nombre) as generos,
-              CASE WHEN l.id_like IS NOT NULL THEN 1 ELSE 0 END as user_liked
+              MAX(CASE WHEN l.id_like IS NOT NULL THEN 1 ELSE 0 END) as user_liked
               FROM Peliculas p
               LEFT JOIN Likes l ON p.id_pelicula = l.id_pelicula AND l.id_usuario = ?
               LEFT JOIN Peliculas_Generos pg ON p.id_pelicula = pg.id_pelicula
